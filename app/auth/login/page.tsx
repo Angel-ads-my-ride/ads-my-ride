@@ -40,7 +40,12 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Mot de passe</label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-sm font-medium text-gray-700">Mot de passe</label>
+                <Link href="/auth/forgot-password" className="text-xs text-orange-500 hover:text-orange-600 font-medium">
+                  Mot de passe oublié ?
+                </Link>
+              </div>
               <input
                 name="password" type="password" required placeholder="••••••••"
                 className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-xl px-4 py-3 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all placeholder:text-gray-400"

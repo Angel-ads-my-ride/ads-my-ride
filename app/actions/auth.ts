@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { createSession, deleteSession } from "@/lib/session";
+import { sendWelcomeEmail } from "@/lib/email";
 
 type AuthState = { error?: string; success?: boolean } | undefined;
 
@@ -36,6 +37,7 @@ export async function registerCustomer(
     });
 
     await createSession(user.id, user.role);
+    sendWelcomeEmail(email, name).catch(() => null);
   } catch {
     return { error: "Une erreur est survenue. Veuillez réessayer." };
   }
@@ -100,6 +102,7 @@ export async function registerAdvertiser(
     });
 
     await createSession(user.id, user.role);
+    sendWelcomeEmail(email, name).catch(() => null);
   } catch {
     return { error: "Une erreur est survenue. Veuillez réessayer." };
   }
