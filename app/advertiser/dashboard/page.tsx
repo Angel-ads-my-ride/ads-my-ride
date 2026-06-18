@@ -97,7 +97,7 @@ export default async function AdvertiserDashboardPage() {
             </div>
           ) : (
             <div className="divide-y divide-gray-100">
-              {user.ads.map((ad) => (
+              {user.ads.map((ad: typeof user.ads[number]) => (
                 <div key={ad.id} className="p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4">
                   <div className="w-full sm:w-20 h-14 bg-gray-100 rounded-xl flex-shrink-0 overflow-hidden border border-gray-100">
                     {ad.imageUrl

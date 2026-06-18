@@ -99,7 +99,7 @@ export default async function DashboardPage() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {user.bookings.map((booking) => {
+                  {user.bookings.map((booking: typeof user.bookings[number]) => {
                     const st = STATUS_LABELS[booking.status] ?? STATUS_LABELS.PENDING;
                     return (
                       <div key={booking.id} className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">

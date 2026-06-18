@@ -128,7 +128,7 @@ export default async function AdvertiserAdDetailPage({ params }: { params: Promi
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {ad.bookings.map((booking) => {
+                  {ad.bookings.map((booking: typeof ad.bookings[number]) => {
                     const st = STATUS_LABELS[booking.status] ?? STATUS_LABELS.PENDING;
                     return (
                       <div
