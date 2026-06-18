@@ -13,11 +13,11 @@ export default function ForgotPasswordPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-6">
-            <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center shadow-sm">
+            <div className="w-8 h-8 bg-zinc-700 rounded-lg flex items-center justify-center shadow-sm">
               <span className="text-white font-bold text-sm">A</span>
             </div>
             <span className="font-bold text-lg text-gray-900">
-              Ads <span className="text-orange-500">My Ride</span>
+              Ads <span className="text-zinc-700">My Ride</span>
             </span>
           </Link>
           <h1 className="text-2xl font-bold text-gray-900">Mot de passe oublié</h1>
@@ -35,7 +35,7 @@ export default function ForgotPasswordPage() {
                 Si un compte existe avec cette adresse, tu recevras un lien de réinitialisation valable <strong>1 heure</strong>.
               </p>
               <Link href="/auth/login"
-                className="inline-block mt-6 text-orange-500 hover:text-orange-600 font-semibold text-sm">
+                className="inline-block mt-6 text-zinc-700 hover:text-zinc-800 font-semibold text-sm">
                 ← Retour à la connexion
               </Link>
             </div>
@@ -54,14 +54,14 @@ export default function ForgotPasswordPage() {
                   type="email"
                   required
                   placeholder="vous@exemple.com"
-                  className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-xl px-4 py-3 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all placeholder:text-gray-400"
+                  className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-xl px-4 py-3 focus:outline-none focus:border-zinc-700 focus:ring-2 focus:ring-zinc-700/15 transition-all placeholder:text-gray-400"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={pending}
-                className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition-colors shadow-sm"
+                className="w-full bg-zinc-700 hover:bg-zinc-800 disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition-colors shadow-sm"
               >
                 {pending ? "Envoi en cours…" : "Envoyer le lien"}
               </button>

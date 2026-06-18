@@ -39,7 +39,7 @@ export default function AdCard({ ad, userBrand, userModel }: { ad: Ad; userBrand
           </div>
         )}
         <div className="absolute top-3 left-3">
-          <span className="bg-orange-500 text-white text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm">
+          <span className="bg-zinc-700 text-white text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm">
             {ad.pricePerDay.toFixed(2)}€/jour
           </span>
         </div>
@@ -53,7 +53,7 @@ export default function AdCard({ ad, userBrand, userModel }: { ad: Ad; userBrand
       </div>
 
       <div className="p-5">
-        <span className="text-xs text-orange-500 font-semibold uppercase tracking-wider">
+        <span className="text-xs text-zinc-700 font-semibold uppercase tracking-wider">
           {ad.advertiser.companyName ?? ad.advertiser.name}
         </span>
         <h3 className="font-bold text-gray-900 text-base mt-1 mb-2 leading-snug">{ad.title}</h3>
@@ -74,7 +74,7 @@ export default function AdCard({ ad, userBrand, userModel }: { ad: Ad; userBrand
           href={isCompatible ? `/ads/${ad.id}` : "#"}
           className={`w-full block text-center py-2.5 rounded-xl text-sm font-semibold transition-colors ${
             isCompatible
-              ? "bg-orange-500 hover:bg-orange-600 text-white"
+              ? "bg-zinc-700 hover:bg-zinc-800 text-white"
               : "bg-gray-100 text-gray-400 cursor-not-allowed pointer-events-none"
           }`}
         >

@@ -16,10 +16,10 @@ export async function sendWelcomeEmail(to: string, name: string) {
       <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#fff;">
         <div style="text-align:center;margin-bottom:32px;">
           <div style="display:inline-flex;align-items:center;gap:8px;">
-            <div style="width:36px;height:36px;background:#f97316;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;">
+            <div style="width:36px;height:36px;background:#3f3f46;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;">
               <span style="color:#fff;font-weight:800;font-size:16px;">A</span>
             </div>
-            <span style="font-weight:800;font-size:18px;color:#111;">Ads <span style="color:#f97316;">My Ride</span></span>
+            <span style="font-weight:800;font-size:18px;color:#111;">Ads <span style="color:#3f3f46;">My Ride</span></span>
           </div>
         </div>
 
@@ -29,7 +29,7 @@ export async function sendWelcomeEmail(to: string, name: string) {
         </p>
 
         <a href="${BASE_URL}/dashboard"
-          style="display:inline-block;background:#f97316;color:#fff;font-weight:700;font-size:15px;padding:12px 28px;border-radius:12px;text-decoration:none;">
+          style="display:inline-block;background:#3f3f46;color:#fff;font-weight:700;font-size:15px;padding:12px 28px;border-radius:12px;text-decoration:none;">
           Accéder à mon espace →
         </a>
 
@@ -53,10 +53,10 @@ export async function sendPasswordResetEmail(to: string, token: string) {
       <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#fff;">
         <div style="text-align:center;margin-bottom:32px;">
           <div style="display:inline-flex;align-items:center;gap:8px;">
-            <div style="width:36px;height:36px;background:#f97316;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;">
+            <div style="width:36px;height:36px;background:#3f3f46;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;">
               <span style="color:#fff;font-weight:800;font-size:16px;">A</span>
             </div>
-            <span style="font-weight:800;font-size:18px;color:#111;">Ads <span style="color:#f97316;">My Ride</span></span>
+            <span style="font-weight:800;font-size:18px;color:#111;">Ads <span style="color:#3f3f46;">My Ride</span></span>
           </div>
         </div>
 
@@ -66,7 +66,7 @@ export async function sendPasswordResetEmail(to: string, token: string) {
         </p>
 
         <a href="${resetUrl}"
-          style="display:inline-block;background:#f97316;color:#fff;font-weight:700;font-size:15px;padding:12px 28px;border-radius:12px;text-decoration:none;">
+          style="display:inline-block;background:#3f3f46;color:#fff;font-weight:700;font-size:15px;padding:12px 28px;border-radius:12px;text-decoration:none;">
           Réinitialiser mon mot de passe →
         </a>
 

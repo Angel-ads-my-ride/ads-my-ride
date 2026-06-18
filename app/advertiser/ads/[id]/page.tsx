@@ -50,11 +50,11 @@ export default async function AdvertiserAdDetailPage({ params }: { params: Promi
           </Link>
           <span className="text-zinc-700">|</span>
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-orange-500 rounded-md flex items-center justify-center">
+            <div className="w-6 h-6 bg-zinc-700 rounded-md flex items-center justify-center">
               <span className="text-white font-bold text-xs">A</span>
             </div>
             <span className="font-bold text-sm">
-              Ads <span className="text-orange-500">My Ride</span>
+              Ads <span className="text-zinc-700">My Ride</span>
             </span>
           </Link>
         </div>
@@ -86,7 +86,7 @@ export default async function AdvertiserAdDetailPage({ params }: { params: Promi
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {[
                 { label: "Candidatures", value: String(ad.bookings.length), icon: Users, color: "text-blue-400", bg: "bg-blue-400/10" },
-                { label: "Rémunération / jour", value: `${ad.pricePerDay.toFixed(2)}€`, icon: Euro, color: "text-orange-400", bg: "bg-orange-400/10" },
+                { label: "Rémunération / jour", value: `${ad.pricePerDay.toFixed(2)}€`, icon: Euro, color: "text-zinc-500", bg: "bg-zinc-600/10" },
                 { label: "Budget restant", value: `${ad.remainingBudget.toFixed(2)}€`, icon: Calendar, color: "text-green-400", bg: "bg-green-400/10" },
               ].map((s) => (
                 <div key={s.label} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
@@ -109,7 +109,7 @@ export default async function AdvertiserAdDetailPage({ params }: { params: Promi
               </div>
               <div className="h-3 bg-zinc-800 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-orange-500 rounded-full transition-all"
+                  className="h-full bg-zinc-700 rounded-full transition-all"
                   style={{ width: `${budgetUsedPct}%` }}
                 />
               </div>
@@ -161,7 +161,7 @@ export default async function AdvertiserAdDetailPage({ params }: { params: Promi
           <div>
             <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 sticky top-6">
               <h2 className="font-semibold text-white mb-4 flex items-center gap-2">
-                <Car className="w-4 h-4 text-orange-500" />
+                <Car className="w-4 h-4 text-zinc-700" />
                 Modèles éligibles
               </h2>
               <div className="space-y-4 max-h-96 overflow-y-auto pr-1">

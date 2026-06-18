@@ -74,8 +74,8 @@ export default function HomeClient({ ads, initialBrand, initialModel, isLoggedIn
         <div className="relative z-10 text-center max-w-2xl mx-auto w-full">
           {/* Car icon */}
           <div className="mb-6 flex justify-center">
-            <div className="w-20 h-20 bg-orange-50 border-2 border-orange-100 rounded-3xl flex items-center justify-center shadow-sm">
-              <Car className="w-10 h-10 text-orange-500" />
+            <div className="w-20 h-20 bg-zinc-50 border-2 border-zinc-100 rounded-3xl flex items-center justify-center shadow-sm">
+              <Car className="w-10 h-10 text-zinc-700" />
             </div>
           </div>
 
@@ -85,9 +85,9 @@ export default function HomeClient({ ads, initialBrand, initialModel, isLoggedIn
           </p>
 
           {/* Car Selector Card — prominent */}
-          <div className="bg-white border-2 border-orange-200 rounded-2xl p-6 sm:p-7 shadow-xl shadow-orange-100/60">
+          <div className="bg-white border-2 border-zinc-300 rounded-2xl p-6 sm:p-7 shadow-xl shadow-zinc-100/60">
             <div className="flex items-center gap-2 mb-5">
-              <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 bg-zinc-700 rounded-lg flex items-center justify-center flex-shrink-0">
                 <Car className="w-4 h-4 text-white" />
               </div>
               <div className="text-left">
@@ -103,13 +103,13 @@ export default function HomeClient({ ads, initialBrand, initialModel, isLoggedIn
                   <select
                     value={selectedBrand}
                     onChange={(e) => handleBrandChange(e.target.value)}
-                    className="w-full bg-white border-2 border-gray-200 text-gray-900 rounded-xl px-4 py-3 pr-10 appearance-none focus:outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-100 transition-all cursor-pointer font-medium shadow-sm hover:border-gray-300"
+                    className="w-full bg-white border-2 border-gray-200 text-gray-900 rounded-xl px-4 py-3 pr-10 appearance-none focus:outline-none focus:border-zinc-500 focus:ring-4 focus:ring-zinc-100 transition-all cursor-pointer font-medium shadow-sm hover:border-gray-300"
                   >
                     <option value="">Choisir une marque</option>
                     {CAR_DATA.map((d) => <option key={d.brand} value={d.brand}>{d.brand}</option>)}
                   </select>
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center w-6 h-6 bg-gray-100 rounded-lg group-focus-within:bg-orange-100 transition-colors">
-                    <ChevronDown className="w-3.5 h-3.5 text-gray-500 group-focus-within:text-orange-500 transition-colors" />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center w-6 h-6 bg-gray-100 rounded-lg group-focus-within:bg-zinc-100 transition-colors">
+                    <ChevronDown className="w-3.5 h-3.5 text-gray-500 group-focus-within:text-zinc-700 transition-colors" />
                   </div>
                 </div>
               </div>
@@ -121,28 +121,28 @@ export default function HomeClient({ ads, initialBrand, initialModel, isLoggedIn
                     value={selectedModel}
                     onChange={(e) => handleModelChange(e.target.value)}
                     disabled={!selectedBrand}
-                    className="w-full bg-white border-2 border-gray-200 text-gray-900 rounded-xl px-4 py-3 pr-10 appearance-none focus:outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-100 transition-all cursor-pointer font-medium shadow-sm hover:border-gray-300 disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:border-gray-200"
+                    className="w-full bg-white border-2 border-gray-200 text-gray-900 rounded-xl px-4 py-3 pr-10 appearance-none focus:outline-none focus:border-zinc-500 focus:ring-4 focus:ring-zinc-100 transition-all cursor-pointer font-medium shadow-sm hover:border-gray-300 disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:border-gray-200"
                   >
                     <option value="">{selectedBrand ? "Choisir un modèle" : "Marque d'abord…"}</option>
                     {models.map((m) => <option key={m} value={m}>{m}</option>)}
                   </select>
-                  <div className={`absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center w-6 h-6 rounded-lg transition-colors ${selectedBrand ? "bg-gray-100 group-focus-within:bg-orange-100" : "bg-gray-50"}`}>
-                    <ChevronDown className={`w-3.5 h-3.5 transition-colors ${selectedBrand ? "text-gray-500 group-focus-within:text-orange-500" : "text-gray-300"}`} />
+                  <div className={`absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center w-6 h-6 rounded-lg transition-colors ${selectedBrand ? "bg-gray-100 group-focus-within:bg-zinc-100" : "bg-gray-50"}`}>
+                    <ChevronDown className={`w-3.5 h-3.5 transition-colors ${selectedBrand ? "text-gray-500 group-focus-within:text-zinc-700" : "text-gray-300"}`} />
                   </div>
                 </div>
               </div>
             </div>
 
             {selectedBrand && selectedModel ? (
-              <div className="mt-4 flex items-center justify-between bg-orange-50 rounded-xl px-4 py-3 border border-orange-100">
+              <div className="mt-4 flex items-center justify-between bg-zinc-50 rounded-xl px-4 py-3 border border-zinc-100">
                 <p className="text-gray-600 text-sm">
                   <span className="text-gray-900 font-bold">{filteredAds.length}</span>{" "}
                   annonce{filteredAds.length !== 1 ? "s" : ""} pour{" "}
-                  <span className="text-orange-500 font-semibold">{selectedBrand} {selectedModel}</span>
+                  <span className="text-zinc-700 font-semibold">{selectedBrand} {selectedModel}</span>
                 </p>
                 <button
                   onClick={() => adsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
-                  className="flex items-center gap-1 text-orange-500 hover:text-orange-600 text-sm font-bold transition-colors"
+                  className="flex items-center gap-1 text-zinc-700 hover:text-zinc-800 text-sm font-bold transition-colors"
                 >
                   Voir <ArrowDown className="w-4 h-4" />
                 </button>
@@ -155,7 +155,7 @@ export default function HomeClient({ ads, initialBrand, initialModel, isLoggedIn
           {!isLoggedIn && (
             <p className="mt-4 text-gray-400 text-sm">
               Pas encore inscrit ?{" "}
-              <Link href="/auth/register" className="text-orange-500 hover:text-orange-600 font-semibold">
+              <Link href="/auth/register" className="text-zinc-700 hover:text-zinc-800 font-semibold">
                 Créer un compte
               </Link>
             </p>
@@ -191,8 +191,8 @@ export default function HomeClient({ ads, initialBrand, initialModel, isLoggedIn
             ].map((item) => (
               <div key={item.step} className="relative">
                 <div className="text-6xl font-black text-gray-100 mb-3 leading-none">{item.step}</div>
-                <div className="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center mb-4 border border-orange-100">
-                  <item.icon className="w-5 h-5 text-orange-500" />
+                <div className="w-10 h-10 bg-zinc-50 rounded-xl flex items-center justify-center mb-4 border border-zinc-100">
+                  <item.icon className="w-5 h-5 text-zinc-700" />
                 </div>
                 <h3 className="font-bold text-lg text-gray-900 mb-2">{item.title}</h3>
                 <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
@@ -221,7 +221,7 @@ export default function HomeClient({ ads, initialBrand, initialModel, isLoggedIn
             {(!selectedBrand || !selectedModel) && (
               <button
                 onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                className="text-sm text-orange-500 hover:text-orange-600 font-semibold border border-orange-200 hover:border-orange-300 px-4 py-2 rounded-xl transition-all self-start bg-orange-50"
+                className="text-sm text-zinc-700 hover:text-zinc-800 font-semibold border border-zinc-300 hover:border-orange-300 px-4 py-2 rounded-xl transition-all self-start bg-zinc-50"
               >
                 ↑ Sélectionner mon véhicule
               </button>

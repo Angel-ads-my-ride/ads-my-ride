@@ -40,7 +40,7 @@ export default function NewAdForm() {
     return acc;
   }, {});
 
-  const inputCls = "w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-xl px-4 py-3 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all placeholder:text-gray-400";
+  const inputCls = "w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-xl px-4 py-3 focus:outline-none focus:border-zinc-700 focus:ring-2 focus:ring-zinc-700/15 transition-all placeholder:text-gray-400";
   const selectCls = `${inputCls} pr-10 appearance-none cursor-pointer`;
 
   return (
@@ -126,7 +126,7 @@ export default function NewAdForm() {
           </div>
           <div className="flex gap-2">
             <button type="button" onClick={addEligibleModel} disabled={!addBrand || !addModel}
-              className="flex-1 flex items-center justify-center gap-1.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold py-3 rounded-xl transition-colors shadow-sm">
+              className="flex-1 flex items-center justify-center gap-1.5 bg-zinc-700 hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold py-3 rounded-xl transition-colors shadow-sm">
               <Plus className="w-4 h-4" /> Ajouter
             </button>
             <button type="button" onClick={addAllModelsForBrand} disabled={!addBrand} title="Ajouter tous les modèles de cette marque"
@@ -166,7 +166,7 @@ export default function NewAdForm() {
 
       <div className="flex items-center gap-4">
         <button type="submit" disabled={pending || eligibleModels.length === 0}
-          className="flex-1 sm:flex-none sm:px-8 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-colors shadow-sm">
+          className="flex-1 sm:flex-none sm:px-8 bg-zinc-700 hover:bg-zinc-800 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-colors shadow-sm">
           {pending ? "Publication…" : "Publier l'annonce"}
         </button>
         <a href="/advertiser/dashboard" className="text-gray-500 hover:text-gray-700 text-sm transition-colors">Annuler</a>

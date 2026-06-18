@@ -16,10 +16,10 @@ export default async function NewAdPage() {
           </Link>
           <span className="text-gray-300">|</span>
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-orange-500 rounded-md flex items-center justify-center shadow-sm">
+            <div className="w-6 h-6 bg-zinc-700 rounded-md flex items-center justify-center shadow-sm">
               <span className="text-white font-bold text-xs">A</span>
             </div>
-            <span className="font-bold text-sm text-gray-900">Ads <span className="text-orange-500">My Ride</span></span>
+            <span className="font-bold text-sm text-gray-900">Ads <span className="text-zinc-700">My Ride</span></span>
           </Link>
         </div>
       </header>

@@ -20,7 +20,7 @@ export default function ApplyButton({ adId }: { adId: string }) {
       <input type="hidden" name="adId" value={adId} />
       {state?.error && <p className="text-red-500 text-xs text-center mb-3">{state.error}</p>}
       <button type="submit" disabled={pending}
-        className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition-colors shadow-sm">
+        className="w-full bg-zinc-700 hover:bg-zinc-800 disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition-colors shadow-sm">
         {pending ? "Envoi…" : "Candidater à cette annonce"}
       </button>
     </form>

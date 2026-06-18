@@ -32,10 +32,10 @@ export default async function AdvertiserDashboardPage() {
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-orange-500 rounded-md flex items-center justify-center shadow-sm">
+            <div className="w-7 h-7 bg-zinc-700 rounded-md flex items-center justify-center shadow-sm">
               <span className="text-white font-bold text-xs">A</span>
             </div>
-            <span className="font-bold text-gray-900">Ads <span className="text-orange-500">My Ride</span></span>
+            <span className="font-bold text-gray-900">Ads <span className="text-zinc-700">My Ride</span></span>
           </Link>
           <div className="flex items-center gap-4">
             <span className="text-gray-500 text-sm hidden sm:block">{user.companyName ?? user.name}</span>
@@ -53,7 +53,7 @@ export default async function AdvertiserDashboardPage() {
             <p className="text-gray-500 mt-1 text-sm">Gérez vos campagnes publicitaires</p>
           </div>
           <Link href="/advertiser/ads/new"
-            className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold px-5 py-2.5 rounded-xl transition-colors text-sm shadow-sm">
+            className="inline-flex items-center gap-2 bg-zinc-700 hover:bg-zinc-800 text-white font-semibold px-5 py-2.5 rounded-xl transition-colors text-sm shadow-sm">
             <Plus className="w-4 h-4" /> Nouvelle annonce
           </Link>
         </div>
@@ -64,7 +64,7 @@ export default async function AdvertiserDashboardPage() {
             { label: "Annonces totales", value: String(totalAds),             icon: BarChart3,  color: "text-blue-600",   bg: "bg-blue-50   border-blue-100" },
             { label: "Actives",          value: String(activeAds),            icon: TrendingUp, color: "text-green-600",  bg: "bg-green-50  border-green-100" },
             { label: "Candidatures",     value: String(totalBook),            icon: Users,      color: "text-purple-600", bg: "bg-purple-50 border-purple-100" },
-            { label: "Budget dépensé",   value: `${totalSpent.toFixed(2)}€`, icon: Euro,       color: "text-orange-600", bg: "bg-orange-50 border-orange-100" },
+            { label: "Budget dépensé",   value: `${totalSpent.toFixed(2)}€`, icon: Euro,       color: "text-zinc-800", bg: "bg-zinc-50 border-zinc-100" },
           ].map((s) => (
             <div key={s.label} className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
               <div className={`w-9 h-9 rounded-xl border flex items-center justify-center mb-3 ${s.bg}`}>
@@ -80,7 +80,7 @@ export default async function AdvertiserDashboardPage() {
         <div className="bg-white border border-gray-200 rounded-2xl shadow-sm">
           <div className="p-6 border-b border-gray-100 flex items-center justify-between">
             <h2 className="font-semibold text-gray-900">Mes annonces</h2>
-            <Link href="/advertiser/ads/new" className="text-orange-500 hover:text-orange-600 text-sm font-medium flex items-center gap-1">
+            <Link href="/advertiser/ads/new" className="text-zinc-700 hover:text-zinc-800 text-sm font-medium flex items-center gap-1">
               <Plus className="w-3.5 h-3.5" /> Créer
             </Link>
           </div>
@@ -91,7 +91,7 @@ export default async function AdvertiserDashboardPage() {
               <p className="text-gray-500 mb-2">Aucune annonce créée</p>
               <p className="text-gray-400 text-sm mb-5">Créez votre première campagne et touchez des milliers de conducteurs.</p>
               <Link href="/advertiser/ads/new"
-                className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold px-5 py-2.5 rounded-xl transition-colors text-sm shadow-sm">
+                className="inline-flex items-center gap-2 bg-zinc-700 hover:bg-zinc-800 text-white font-semibold px-5 py-2.5 rounded-xl transition-colors text-sm shadow-sm">
                 <Plus className="w-4 h-4" /> Créer une annonce
               </Link>
             </div>
@@ -122,7 +122,7 @@ export default async function AdvertiserDashboardPage() {
 
                   <div className="w-full sm:w-28">
                     <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-orange-500 rounded-full"
+                      <div className="h-full bg-zinc-700 rounded-full"
                         style={{ width: `${Math.max(0, Math.min(100, ((ad.totalBudget - ad.remainingBudget) / ad.totalBudget) * 100))}%` }} />
                     </div>
                     <p className="text-gray-400 text-xs mt-1 text-right">

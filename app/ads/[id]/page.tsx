@@ -40,10 +40,10 @@ export default async function AdDetailPage({ params }: { params: Promise<{ id: s
             <ArrowLeft className="w-4 h-4" /> Retour aux annonces
           </Link>
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-orange-500 rounded-md flex items-center justify-center shadow-sm">
+            <div className="w-6 h-6 bg-zinc-700 rounded-md flex items-center justify-center shadow-sm">
               <span className="text-white font-bold text-xs">A</span>
             </div>
-            <span className="font-bold text-sm text-gray-900">Ads <span className="text-orange-500">My Ride</span></span>
+            <span className="font-bold text-sm text-gray-900">Ads <span className="text-zinc-700">My Ride</span></span>
           </Link>
         </div>
       </header>
@@ -58,14 +58,14 @@ export default async function AdDetailPage({ params }: { params: Promise<{ id: s
             </div>
 
             <div>
-              <p className="text-orange-500 text-sm font-semibold mb-1">{ad.advertiser.companyName ?? ad.advertiser.name}</p>
+              <p className="text-zinc-700 text-sm font-semibold mb-1">{ad.advertiser.companyName ?? ad.advertiser.name}</p>
               <h1 className="text-3xl font-bold text-gray-900 mb-3">{ad.title}</h1>
               <p className="text-gray-500 leading-relaxed">{ad.description}</p>
             </div>
 
             <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
               <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <Car className="w-4 h-4 text-orange-500" />
+                <Car className="w-4 h-4 text-zinc-700" />
                 Véhicules éligibles ({ad.eligibleModels.length} modèles)
               </h2>
               <div className="space-y-4">
@@ -116,7 +116,7 @@ export default async function AdDetailPage({ params }: { params: Promise<{ id: s
               ) : session?.role === "CUSTOMER" ? (
                 <ApplyButton adId={id} />
               ) : (
-                <Link href="/auth/register" className="block text-center bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-xl transition-colors shadow-sm">
+                <Link href="/auth/register" className="block text-center bg-zinc-700 hover:bg-zinc-800 text-white font-semibold py-3 rounded-xl transition-colors shadow-sm">
                   S&apos;inscrire pour candidater
                 </Link>
               )}

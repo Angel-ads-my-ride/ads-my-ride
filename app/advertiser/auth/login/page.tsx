@@ -12,11 +12,11 @@ export default function AdvertiserLoginPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-6">
-            <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center shadow-sm">
+            <div className="w-8 h-8 bg-zinc-700 rounded-lg flex items-center justify-center shadow-sm">
               <span className="text-white font-bold text-sm">A</span>
             </div>
             <span className="font-bold text-lg text-gray-900">
-              Ads <span className="text-orange-500">My Ride</span>
+              Ads <span className="text-zinc-700">My Ride</span>
             </span>
           </Link>
           <div className="inline-flex items-center gap-2 bg-gray-100 border border-gray-200 text-gray-600 text-xs px-3 py-1.5 rounded-full mb-3 font-medium">
@@ -37,22 +37,22 @@ export default function AdvertiserLoginPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Email professionnel</label>
               <input name="email" type="email" required placeholder="contact@votre-marque.fr"
-                className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-xl px-4 py-3 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all placeholder:text-gray-400" />
+                className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-xl px-4 py-3 focus:outline-none focus:border-zinc-700 focus:ring-2 focus:ring-zinc-700/15 transition-all placeholder:text-gray-400" />
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="block text-sm font-medium text-gray-700">Mot de passe</label>
-                <Link href="/auth/forgot-password" className="text-xs text-orange-500 hover:text-orange-600 font-medium">
+                <Link href="/auth/forgot-password" className="text-xs text-zinc-700 hover:text-zinc-800 font-medium">
                   Mot de passe oublié ?
                 </Link>
               </div>
               <input name="password" type="password" required placeholder="••••••••"
-                className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-xl px-4 py-3 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all placeholder:text-gray-400" />
+                className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-xl px-4 py-3 focus:outline-none focus:border-zinc-700 focus:ring-2 focus:ring-zinc-700/15 transition-all placeholder:text-gray-400" />
             </div>
 
             <button type="submit" disabled={pending}
-              className="w-full bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition-colors shadow-sm">
+              className="w-full bg-zinc-700 hover:bg-zinc-800 disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition-colors shadow-sm">
               {pending ? "Connexion…" : "Se connecter"}
             </button>
           </form>
@@ -60,7 +60,7 @@ export default function AdvertiserLoginPage() {
           <div className="mt-6 pt-6 border-t border-gray-100 text-center">
             <p className="text-gray-500 text-sm">
               Pas encore partenaire ?{" "}
-              <Link href="/advertiser/auth/register" className="text-orange-500 hover:text-orange-600 font-semibold">
+              <Link href="/advertiser/auth/register" className="text-zinc-700 hover:text-zinc-800 font-semibold">
                 Créer un compte annonceur
               </Link>
             </p>
