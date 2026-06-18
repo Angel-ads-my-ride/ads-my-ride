@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { Plus, Trash2, ChevronDown, Info } from "lucide-react";
+import { Plus, Trash2, ChevronDown, Info, EyeOff, Users, Zap } from "lucide-react";
 import { createAd } from "@/app/actions/ads";
 import { CAR_DATA, getModelsForBrand } from "@/lib/car-data";
 
@@ -12,6 +12,8 @@ export default function NewAdForm() {
   const [eligibleModels, setEligibleModels] = useState<EligibleModel[]>([]);
   const [addBrand, setAddBrand] = useState("");
   const [addModel, setAddModel] = useState("");
+  const [isConfidential, setIsConfidential] = useState(false);
+  const [autoAccept, setAutoAccept] = useState(false);
 
   const addModelsForBrand = getModelsForBrand(addBrand);
 
@@ -46,6 +48,8 @@ export default function NewAdForm() {
   return (
     <form action={action} className="space-y-6">
       <input type="hidden" name="eligibleModels" value={JSON.stringify(eligibleModels)} />
+      <input type="hidden" name="isConfidential" value={String(isConfidential)} />
+      <input type="hidden" name="autoAccept" value={String(autoAccept)} />
 
       {state?.error && (
         <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl">{state.error}</div>
@@ -160,6 +164,53 @@ export default function NewAdForm() {
               </div>
             ))}
             <p className="text-gray-400 text-xs">{eligibleModels.length} modèle{eligibleModels.length !== 1 ? "s" : ""} sélectionné{eligibleModels.length !== 1 ? "s" : ""}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Advanced options */}
+      <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-5 shadow-sm">
+        <h2 className="font-semibold text-gray-900">Options avancées</h2>
+
+        {/* isConfidential */}
+        <label className="flex items-start gap-3 cursor-pointer">
+          <div className="relative mt-0.5">
+            <input type="checkbox" className="sr-only peer" checked={isConfidential} onChange={(e) => setIsConfidential(e.target.checked)} />
+            <div className="w-5 h-5 rounded border-2 border-gray-300 peer-checked:bg-zinc-700 peer-checked:border-zinc-700 transition-colors flex items-center justify-center">
+              {isConfidential && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>}
+            </div>
+          </div>
+          <div>
+            <div className="flex items-center gap-1.5 text-sm font-medium text-gray-900">
+              <EyeOff className="w-4 h-4 text-gray-400" /> Image confidentielle
+            </div>
+            <p className="text-gray-400 text-xs mt-0.5">L&apos;image du visuel sera masquée sur la page publique de l&apos;annonce.</p>
+          </div>
+        </label>
+
+        {/* autoAccept + maxApplicants */}
+        <label className="flex items-start gap-3 cursor-pointer">
+          <div className="relative mt-0.5">
+            <input type="checkbox" className="sr-only peer" checked={autoAccept} onChange={(e) => setAutoAccept(e.target.checked)} />
+            <div className="w-5 h-5 rounded border-2 border-gray-300 peer-checked:bg-zinc-700 peer-checked:border-zinc-700 transition-colors flex items-center justify-center">
+              {autoAccept && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>}
+            </div>
+          </div>
+          <div>
+            <div className="flex items-center gap-1.5 text-sm font-medium text-gray-900">
+              <Zap className="w-4 h-4 text-gray-400" /> Acceptation automatique
+            </div>
+            <p className="text-gray-400 text-xs mt-0.5">Les candidatures sont acceptées automatiquement jusqu&apos;au nombre limite ci-dessous.</p>
+          </div>
+        </label>
+
+        {autoAccept && (
+          <div className="pl-8">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-1.5">
+              <Users className="w-4 h-4 text-gray-400" /> Nombre maximum de conducteurs
+            </label>
+            <input name="maxApplicants" type="number" min="1" step="1" placeholder="Ex : 50"
+              className={`${inputCls} max-w-xs`} />
           </div>
         )}
       </div>

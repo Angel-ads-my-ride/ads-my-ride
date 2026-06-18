@@ -1,16 +1,17 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/session";
-import { Euro, Car, Calendar, Users, ArrowLeft, CheckCircle } from "lucide-react";
+import { Euro, Car, Calendar, Users, ArrowLeft, CheckCircle, EyeOff } from "lucide-react";
 import ApplyButton from "./ApplyButton";
+import { incrementViewCount } from "@/app/actions/ads";
 
 export default async function AdDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const session = await getSession();
 
   const ad = await db.ad.findUnique({
-    where: { id },
+    where: { id, status: "APPROVED" },
     include: {
       advertiser: { select: { companyName: true, name: true } },
       eligibleModels: true,
@@ -19,6 +20,8 @@ export default async function AdDetailPage({ params }: { params: Promise<{ id: s
   });
 
   if (!ad) notFound();
+
+  incrementViewCount(id).catch(() => null);
 
   let alreadyApplied = false;
   if (session?.userId) {
@@ -52,9 +55,16 @@ export default async function AdDetailPage({ params }: { params: Promise<{ id: s
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             <div className="aspect-video bg-gray-100 rounded-2xl overflow-hidden border border-gray-200">
-              {ad.imageUrl
-                ? <img src={ad.imageUrl} alt={ad.title} className="w-full h-full object-cover" />
-                : <div className="w-full h-full flex items-center justify-center"><Car className="w-16 h-16 text-gray-300" /></div>}
+              {ad.isConfidential ? (
+                <div className="w-full h-full flex flex-col items-center justify-center gap-2">
+                  <EyeOff className="w-12 h-12 text-gray-300" />
+                  <p className="text-gray-400 text-sm">Visuel confidentiel</p>
+                </div>
+              ) : ad.imageUrl ? (
+                <img src={ad.imageUrl} alt={ad.title} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center"><Car className="w-16 h-16 text-gray-300" /></div>
+              )}
             </div>
 
             <div>

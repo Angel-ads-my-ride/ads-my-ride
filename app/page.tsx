@@ -8,7 +8,7 @@ export default async function HomePage() {
 
   const ads = await db.ad
     .findMany({
-      where: { isActive: true, remainingBudget: { gt: 0 } },
+      where: { isActive: true, status: "APPROVED", remainingBudget: { gt: 0 } },
       include: {
         advertiser: { select: { name: true, companyName: true } },
         eligibleModels: true,

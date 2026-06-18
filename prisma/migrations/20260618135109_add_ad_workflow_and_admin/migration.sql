@@ -1,0 +1,7 @@
+-- AlterTable
+ALTER TABLE "ads" ADD COLUMN     "adminMessage" TEXT,
+ADD COLUMN     "autoAccept" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "isConfidential" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "maxApplicants" INTEGER,
+ADD COLUMN     "status" TEXT NOT NULL DEFAULT 'PENDING_REVIEW',
+ADD COLUMN     "viewCount" INTEGER NOT NULL DEFAULT 0;

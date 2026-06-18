@@ -36,10 +36,16 @@ model Ad {
   title           String
   description     String
   imageUrl        String?
+  isConfidential  Boolean  @default(false)
   pricePerDay     Float
   totalBudget     Float
   remainingBudget Float
   isActive        Boolean  @default(true)
+  maxApplicants   Int?
+  autoAccept      Boolean  @default(false)
+  status          String   @default("PENDING_REVIEW")
+  adminMessage    String?
+  viewCount       Int      @default(0)
   startDate       DateTime?
   endDate         DateTime?
   createdAt       DateTime @default(now())
