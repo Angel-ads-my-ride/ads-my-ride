@@ -59,21 +59,31 @@ export default function RegisterPage() {
                 Votre véhicule <span className="text-gray-400 font-normal">(optionnel)</span>
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="relative">
-                  <select name="carBrand" value={selectedBrand} onChange={(e) => setSelectedBrand(e.target.value)}
-                    className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-xl px-4 py-3 pr-10 appearance-none focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all cursor-pointer">
-                    <option value="">-- Marque --</option>
-                    {CAR_DATA.map((d) => <option key={d.brand} value={d.brand}>{d.brand}</option>)}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                <div>
+                  <label className="block text-xs text-gray-500 font-semibold mb-1.5 uppercase tracking-wider">Marque</label>
+                  <div className="relative group">
+                    <select name="carBrand" value={selectedBrand} onChange={(e) => setSelectedBrand(e.target.value)}
+                      className="w-full bg-white border-2 border-gray-200 text-gray-900 rounded-xl px-4 py-3 pr-10 appearance-none focus:outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-100 transition-all cursor-pointer font-medium shadow-sm hover:border-gray-300">
+                      <option value="">Choisir une marque</option>
+                      {CAR_DATA.map((d) => <option key={d.brand} value={d.brand}>{d.brand}</option>)}
+                    </select>
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center w-6 h-6 bg-gray-100 rounded-lg group-focus-within:bg-orange-100 transition-colors">
+                      <ChevronDown className="w-3.5 h-3.5 text-gray-500 group-focus-within:text-orange-500 transition-colors" />
+                    </div>
+                  </div>
                 </div>
-                <div className="relative">
-                  <select name="carModel" disabled={!selectedBrand}
-                    className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-xl px-4 py-3 pr-10 appearance-none focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
-                    <option value="">-- Modèle --</option>
-                    {models.map((m) => <option key={m} value={m}>{m}</option>)}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                <div>
+                  <label className="block text-xs text-gray-500 font-semibold mb-1.5 uppercase tracking-wider">Modèle</label>
+                  <div className="relative group">
+                    <select name="carModel" disabled={!selectedBrand}
+                      className="w-full bg-white border-2 border-gray-200 text-gray-900 rounded-xl px-4 py-3 pr-10 appearance-none focus:outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-100 transition-all cursor-pointer font-medium shadow-sm hover:border-gray-300 disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:border-gray-200">
+                      <option value="">{selectedBrand ? "Choisir un modèle" : "Marque d'abord…"}</option>
+                      {models.map((m) => <option key={m} value={m}>{m}</option>)}
+                    </select>
+                    <div className={`absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center w-6 h-6 rounded-lg transition-colors ${selectedBrand ? "bg-gray-100 group-focus-within:bg-orange-100" : "bg-gray-50"}`}>
+                      <ChevronDown className={`w-3.5 h-3.5 transition-colors ${selectedBrand ? "text-gray-500 group-focus-within:text-orange-500" : "text-gray-300"}`} />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

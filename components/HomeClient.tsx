@@ -4,7 +4,6 @@ import { useState, useRef } from "react";
 import { ChevronDown, Car, ArrowDown, Shield, TrendingUp } from "lucide-react";
 import { CAR_DATA, getModelsForBrand } from "@/lib/car-data";
 import AdCard from "./AdCard";
-import CarAnimation from "./CarAnimation";
 import Link from "next/link";
 
 type Ad = {
@@ -73,9 +72,11 @@ export default function HomeClient({ ads, initialBrand, initialModel, isLoggedIn
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-gray-400/10 rounded-full blur-3xl" />
 
         <div className="relative z-10 text-center max-w-2xl mx-auto w-full">
-          {/* Animated car */}
-          <div className="mb-3">
-            <CarAnimation />
+          {/* Car icon */}
+          <div className="mb-6 flex justify-center">
+            <div className="w-20 h-20 bg-orange-50 border-2 border-orange-100 rounded-3xl flex items-center justify-center shadow-sm">
+              <Car className="w-10 h-10 text-orange-500" />
+            </div>
           </div>
 
           {/* Subtitle */}
@@ -96,34 +97,38 @@ export default function HomeClient({ ads, initialBrand, initialModel, isLoggedIn
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="relative">
+              <div>
                 <label className="block text-xs text-gray-500 font-semibold mb-1.5 uppercase tracking-wider">Marque</label>
-                <div className="relative">
+                <div className="relative group">
                   <select
                     value={selectedBrand}
                     onChange={(e) => handleBrandChange(e.target.value)}
-                    className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-xl px-4 py-3 pr-10 appearance-none focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all cursor-pointer font-medium"
+                    className="w-full bg-white border-2 border-gray-200 text-gray-900 rounded-xl px-4 py-3 pr-10 appearance-none focus:outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-100 transition-all cursor-pointer font-medium shadow-sm hover:border-gray-300"
                   >
-                    <option value="">-- Choisir une marque --</option>
+                    <option value="">Choisir une marque</option>
                     {CAR_DATA.map((d) => <option key={d.brand} value={d.brand}>{d.brand}</option>)}
                   </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center w-6 h-6 bg-gray-100 rounded-lg group-focus-within:bg-orange-100 transition-colors">
+                    <ChevronDown className="w-3.5 h-3.5 text-gray-500 group-focus-within:text-orange-500 transition-colors" />
+                  </div>
                 </div>
               </div>
 
-              <div className="relative">
+              <div>
                 <label className="block text-xs text-gray-500 font-semibold mb-1.5 uppercase tracking-wider">Modèle</label>
-                <div className="relative">
+                <div className="relative group">
                   <select
                     value={selectedModel}
                     onChange={(e) => handleModelChange(e.target.value)}
                     disabled={!selectedBrand}
-                    className="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-xl px-4 py-3 pr-10 appearance-none focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed font-medium"
+                    className="w-full bg-white border-2 border-gray-200 text-gray-900 rounded-xl px-4 py-3 pr-10 appearance-none focus:outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-100 transition-all cursor-pointer font-medium shadow-sm hover:border-gray-300 disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:border-gray-200"
                   >
-                    <option value="">-- Choisir un modèle --</option>
+                    <option value="">{selectedBrand ? "Choisir un modèle" : "Marque d'abord…"}</option>
                     {models.map((m) => <option key={m} value={m}>{m}</option>)}
                   </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  <div className={`absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center w-6 h-6 rounded-lg transition-colors ${selectedBrand ? "bg-gray-100 group-focus-within:bg-orange-100" : "bg-gray-50"}`}>
+                    <ChevronDown className={`w-3.5 h-3.5 transition-colors ${selectedBrand ? "text-gray-500 group-focus-within:text-orange-500" : "text-gray-300"}`} />
+                  </div>
                 </div>
               </div>
             </div>

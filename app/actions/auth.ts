@@ -24,17 +24,21 @@ export async function registerCustomer(
     return { error: "Le mot de passe doit faire au moins 8 caractères." };
   }
 
-  const existing = await db.user.findUnique({ where: { email } });
-  if (existing) {
-    return { error: "Un compte existe déjà avec cet email." };
+  try {
+    const existing = await db.user.findUnique({ where: { email } });
+    if (existing) {
+      return { error: "Un compte existe déjà avec cet email." };
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await db.user.create({
+      data: { name, email, password: hashedPassword, role: "CUSTOMER", carBrand, carModel },
+    });
+
+    await createSession(user.id, user.role);
+  } catch {
+    return { error: "Une erreur est survenue. Veuillez réessayer." };
   }
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const user = await db.user.create({
-    data: { name, email, password: hashedPassword, role: "CUSTOMER", carBrand, carModel },
-  });
-
-  await createSession(user.id, user.role);
   redirect("/dashboard");
 }
 
@@ -49,17 +53,21 @@ export async function loginCustomer(
     return { error: "Email et mot de passe requis." };
   }
 
-  const user = await db.user.findUnique({ where: { email } });
-  if (!user || user.role !== "CUSTOMER") {
-    return { error: "Identifiants incorrects." };
-  }
+  try {
+    const user = await db.user.findUnique({ where: { email } });
+    if (!user || user.role !== "CUSTOMER") {
+      return { error: "Identifiants incorrects." };
+    }
 
-  const valid = await bcrypt.compare(password, user.password);
-  if (!valid) {
-    return { error: "Identifiants incorrects." };
-  }
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) {
+      return { error: "Identifiants incorrects." };
+    }
 
-  await createSession(user.id, user.role);
+    await createSession(user.id, user.role);
+  } catch {
+    return { error: "Une erreur est survenue. Veuillez réessayer." };
+  }
   redirect("/dashboard");
 }
 
@@ -80,17 +88,21 @@ export async function registerAdvertiser(
     return { error: "Le mot de passe doit faire au moins 8 caractères." };
   }
 
-  const existing = await db.user.findUnique({ where: { email } });
-  if (existing) {
-    return { error: "Un compte existe déjà avec cet email." };
+  try {
+    const existing = await db.user.findUnique({ where: { email } });
+    if (existing) {
+      return { error: "Un compte existe déjà avec cet email." };
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await db.user.create({
+      data: { name, email, password: hashedPassword, role: "ADVERTISER", companyName, siret },
+    });
+
+    await createSession(user.id, user.role);
+  } catch {
+    return { error: "Une erreur est survenue. Veuillez réessayer." };
   }
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const user = await db.user.create({
-    data: { name, email, password: hashedPassword, role: "ADVERTISER", companyName, siret },
-  });
-
-  await createSession(user.id, user.role);
   redirect("/advertiser/dashboard");
 }
 
@@ -105,17 +117,21 @@ export async function loginAdvertiser(
     return { error: "Email et mot de passe requis." };
   }
 
-  const user = await db.user.findUnique({ where: { email } });
-  if (!user || user.role !== "ADVERTISER") {
-    return { error: "Identifiants incorrects." };
-  }
+  try {
+    const user = await db.user.findUnique({ where: { email } });
+    if (!user || user.role !== "ADVERTISER") {
+      return { error: "Identifiants incorrects." };
+    }
 
-  const valid = await bcrypt.compare(password, user.password);
-  if (!valid) {
-    return { error: "Identifiants incorrects." };
-  }
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) {
+      return { error: "Identifiants incorrects." };
+    }
 
-  await createSession(user.id, user.role);
+    await createSession(user.id, user.role);
+  } catch {
+    return { error: "Une erreur est survenue. Veuillez réessayer." };
+  }
   redirect("/advertiser/dashboard");
 }
 
