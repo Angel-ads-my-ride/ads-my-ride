@@ -26,7 +26,7 @@ export default async function AdDetailPage({ params }: { params: Promise<{ id: s
     alreadyApplied = !!booking;
   }
 
-  const groupedModels = ad.eligibleModels.reduce<Record<string, string[]>>((acc: Record<string, string[]>, m) => {
+  const groupedModels = ad.eligibleModels.reduce<Record<string, string[]>>((acc: Record<string, string[]>, m: { brand: string; model: string }) => {
     if (!acc[m.brand]) acc[m.brand] = [];
     acc[m.brand].push(m.model);
     return acc;
