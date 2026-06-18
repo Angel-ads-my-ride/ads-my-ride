@@ -130,7 +130,7 @@ export default function NewAdForm() {
           </div>
           <div className="flex gap-2">
             <button type="button" onClick={addEligibleModel} disabled={!addBrand || !addModel}
-              className="flex-1 flex items-center justify-center gap-1.5 bg-zinc-700 hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold py-3 rounded-xl transition-colors shadow-sm">
+              className="flex-1 flex items-center justify-center gap-1.5 bg-zinc-700 hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed text-zinc-900 text-sm font-semibold py-3 rounded-xl transition-colors shadow-sm">
               <Plus className="w-4 h-4" /> Ajouter
             </button>
             <button type="button" onClick={addAllModelsForBrand} disabled={!addBrand} title="Ajouter tous les modèles de cette marque"
@@ -217,7 +217,7 @@ export default function NewAdForm() {
 
       <div className="flex items-center gap-4">
         <button type="submit" disabled={pending || eligibleModels.length === 0}
-          className="flex-1 sm:flex-none sm:px-8 bg-zinc-700 hover:bg-zinc-800 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-colors shadow-sm">
+          className="flex-1 sm:flex-none sm:px-8 bg-zinc-700 hover:bg-zinc-800 disabled:opacity-60 disabled:cursor-not-allowed text-zinc-900 font-semibold py-3 rounded-xl transition-colors shadow-sm">
           {pending ? "Publication…" : "Publier l'annonce"}
         </button>
         <a href="/advertiser/dashboard" className="text-gray-500 hover:text-gray-700 text-sm transition-colors">Annuler</a>

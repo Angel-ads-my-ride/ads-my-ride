@@ -12,7 +12,23 @@
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
       "Bash(git push *)",
-      "Bash(echo \"exit:$?\")"
+      "Bash(echo \"exit:$?\")",
+      "Bash(mkdir -p \"/Users/gegellicorne/Desktop/Ads My Ride/app/admin/ads/[id]\" \"/Users/gegellicorne/Desktop/Ads My Ride/app/admin/users\" \"/Users/gegellicorne/Desktop/Ads My Ride/app/admin/bookings\")",
+      "Bash(npx tsx *)",
+      "Bash(npx dotenv *)",
+      "Bash(DATABASE_URL=\"postgresql://default:JLNQ4dqbsT2U@ep-icy-flower-a24lvxr9-pooler.eu-central-1.aws.neon.tech/verceldb?sslmode=require&channel_binding=require\" npx tsx scripts/seed-admins.ts)",
+      "Bash(git commit -m 'feat: rewrite admin.adsmyride.com → /admin via middleware *)",
+      "Bash(npx next *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3001)",
+      "Bash(git commit -m 'style: tint primary zinc-700/800 with warm yellow hue *)",
+      "Bash(git commit -m 'fix: remove middleware.ts conflict, add admin login page + proxy rewrite *)",
+      "Bash(git rm *)",
+      "Bash(git commit -m 'fix: remove middleware.ts from git tracking *)",
+      "Bash(python3)",
+      "Bash(git commit -m 'style: yellow primary color + Logo.png replaces A badge everywhere *)"
+    ],
+    "additionalDirectories": [
+      "/Users/gegellicorne/Desktop/Ads My Ride/app/admin/ads"
     ]
   }
 }

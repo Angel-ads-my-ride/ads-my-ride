@@ -69,7 +69,7 @@ export default function ReviewForm({ adId, currentStatus }: { adId: string; curr
         type="button"
         onClick={submit}
         disabled={isPending || (decision !== "APPROVED" && !message.trim())}
-        className="w-full bg-zinc-700 hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-colors"
+        className="w-full bg-zinc-700 hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-900 font-semibold py-3 rounded-xl transition-colors"
       >
         {isPending ? "Envoi…" : "Confirmer la décision"}
       </button>

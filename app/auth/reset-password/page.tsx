@@ -30,9 +30,7 @@ function ResetPasswordForm() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-6">
-            <div className="w-8 h-8 bg-zinc-700 rounded-lg flex items-center justify-center shadow-sm">
-              <span className="text-white font-bold text-sm">A</span>
-            </div>
+            <img src="/Logo.png" alt="Ads My Ride" className="w-8 h-8 object-contain" />
             <span className="font-bold text-lg text-gray-900">
               Ads <span className="text-zinc-700">My Ride</span>
             </span>
@@ -50,7 +48,7 @@ function ResetPasswordForm() {
               <h2 className="font-bold text-gray-900 text-lg mb-2">Mot de passe mis à jour !</h2>
               <p className="text-gray-500 text-sm">Tu peux maintenant te connecter avec ton nouveau mot de passe.</p>
               <Link href="/auth/login"
-                className="inline-block mt-6 bg-zinc-700 hover:bg-zinc-800 text-white font-semibold px-6 py-3 rounded-xl transition-colors">
+                className="inline-block mt-6 bg-zinc-700 hover:bg-zinc-800 text-zinc-900 font-semibold px-6 py-3 rounded-xl transition-colors">
                 Se connecter
               </Link>
             </div>
@@ -98,7 +96,7 @@ function ResetPasswordForm() {
               <button
                 type="submit"
                 disabled={pending}
-                className="w-full bg-zinc-700 hover:bg-zinc-800 disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition-colors shadow-sm"
+                className="w-full bg-zinc-700 hover:bg-zinc-800 disabled:opacity-60 text-zinc-900 font-semibold py-3 rounded-xl transition-colors shadow-sm"
               >
                 {pending ? "Mise à jour…" : "Mettre à jour le mot de passe"}
               </button>

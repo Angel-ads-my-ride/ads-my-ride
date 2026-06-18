@@ -43,9 +43,7 @@ export default async function AdDetailPage({ params }: { params: Promise<{ id: s
             <ArrowLeft className="w-4 h-4" /> Retour aux annonces
           </Link>
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-zinc-700 rounded-md flex items-center justify-center shadow-sm">
-              <span className="text-white font-bold text-xs">A</span>
-            </div>
+            <img src="/Logo.png" alt="Ads My Ride" className="w-6 h-6 object-contain" />
             <span className="font-bold text-sm text-gray-900">Ads <span className="text-zinc-700">My Ride</span></span>
           </Link>
         </div>
@@ -126,7 +124,7 @@ export default async function AdDetailPage({ params }: { params: Promise<{ id: s
               ) : session?.role === "CUSTOMER" ? (
                 <ApplyButton adId={id} />
               ) : (
-                <Link href="/auth/register" className="block text-center bg-zinc-700 hover:bg-zinc-800 text-white font-semibold py-3 rounded-xl transition-colors shadow-sm">
+                <Link href="/auth/register" className="block text-center bg-zinc-700 hover:bg-zinc-800 text-zinc-900 font-semibold py-3 rounded-xl transition-colors shadow-sm">
                   S&apos;inscrire pour candidater
                 </Link>
               )}

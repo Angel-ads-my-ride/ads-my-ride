@@ -38,9 +38,7 @@ export default async function DashboardPage() {
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-zinc-700 rounded-md flex items-center justify-center shadow-sm">
-              <span className="text-white font-bold text-xs">A</span>
-            </div>
+            <img src="/Logo.png" alt="Ads My Ride" className="w-7 h-7 object-contain" />
             <span className="font-bold text-gray-900">Ads <span className="text-zinc-700">My Ride</span></span>
           </Link>
           <div className="flex items-center gap-4">
@@ -93,7 +91,7 @@ export default async function DashboardPage() {
                 <div className="text-center py-12">
                   <Car className="w-12 h-12 text-gray-200 mx-auto mb-3" />
                   <p className="text-gray-400">Aucune candidature pour le moment</p>
-                  <Link href="/" className="inline-block mt-4 bg-zinc-700 hover:bg-zinc-800 text-white text-sm font-semibold px-5 py-2 rounded-xl transition-colors shadow-sm">
+                  <Link href="/" className="inline-block mt-4 bg-zinc-700 hover:bg-zinc-800 text-zinc-900 text-sm font-semibold px-5 py-2 rounded-xl transition-colors shadow-sm">
                     Voir les annonces
                   </Link>
                 </div>

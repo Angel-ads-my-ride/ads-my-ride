@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --color-zinc-700: oklch(30% 0.04 85);
-  --color-zinc-800: oklch(23% 0.03 85);
+  --color-zinc-700: oklch(60% 0.18 85);
+  --color-zinc-800: oklch(50% 0.15 85);
 }
 
 :root {

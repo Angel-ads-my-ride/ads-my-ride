@@ -39,7 +39,7 @@ export default function AdCard({ ad, userBrand, userModel }: { ad: Ad; userBrand
           </div>
         )}
         <div className="absolute top-3 left-3">
-          <span className="bg-zinc-700 text-white text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm">
+          <span className="bg-zinc-700 text-zinc-900 text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm">
             {ad.pricePerDay.toFixed(2)}€/jour
           </span>
         </div>

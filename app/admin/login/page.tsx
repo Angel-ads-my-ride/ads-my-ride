@@ -10,9 +10,7 @@ export default function AdminLoginPage() {
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="w-12 h-12 bg-zinc-700 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <span className="text-white font-bold text-lg">A</span>
-          </div>
+          <img src="/Logo.png" alt="Ads My Ride" className="w-12 h-12 object-contain mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-white">Admin</h1>
           <p className="text-zinc-500 text-sm mt-1">Ads My Ride — Super Admin</p>
         </div>
@@ -51,7 +49,7 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={pending}
-            className="w-full bg-zinc-700 hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-colors"
+            className="w-full bg-zinc-700 hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-900 font-semibold py-3 rounded-xl transition-colors"
           >
             {pending ? "Connexion…" : "Se connecter"}
           </button>
