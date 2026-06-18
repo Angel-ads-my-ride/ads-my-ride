@@ -29,7 +29,7 @@ export default async function AdvertiserAdDetailPage({ params }: { params: Promi
 
   if (!ad) notFound();
 
-  const groupedModels = ad.eligibleModels.reduce<Record<string, string[]>>((acc, m) => {
+  const groupedModels = ad.eligibleModels.reduce<Record<string, string[]>>((acc: Record<string, string[]>, m: { brand: string; model: string }) => {
     if (!acc[m.brand]) acc[m.brand] = [];
     acc[m.brand].push(m.model);
     return acc;
@@ -165,7 +165,7 @@ export default async function AdvertiserAdDetailPage({ params }: { params: Promi
                 Modèles éligibles
               </h2>
               <div className="space-y-4 max-h-96 overflow-y-auto pr-1">
-                {Object.entries(groupedModels).map(([brand, models]) => (
+                {(Object.entries(groupedModels) as [string, string[]][]).map(([brand, models]) => (
                   <div key={brand}>
                     <p className="text-zinc-400 text-xs font-medium uppercase tracking-wider mb-2">{brand}</p>
                     <div className="flex flex-wrap gap-1.5">

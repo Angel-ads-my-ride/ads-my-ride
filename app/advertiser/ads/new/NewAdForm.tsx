@@ -34,7 +34,7 @@ export default function NewAdForm() {
     setEligibleModels(eligibleModels.filter((_, i) => i !== idx));
   }
 
-  const groupedModels = eligibleModels.reduce<Record<string, string[]>>((acc, m) => {
+  const groupedModels = eligibleModels.reduce<Record<string, string[]>>((acc: Record<string, string[]>, m: EligibleModel) => {
     if (!acc[m.brand]) acc[m.brand] = [];
     acc[m.brand].push(m.model);
     return acc;
@@ -142,7 +142,7 @@ export default function NewAdForm() {
           </div>
         ) : (
           <div className="space-y-3">
-            {Object.entries(groupedModels).map(([brand, models]) => (
+            {(Object.entries(groupedModels) as [string, string[]][]).map(([brand, models]) => (
               <div key={brand} className="bg-gray-50 rounded-xl p-4 border border-gray-100">
                 <p className="text-gray-700 font-semibold text-sm mb-2">{brand}</p>
                 <div className="flex flex-wrap gap-2">
