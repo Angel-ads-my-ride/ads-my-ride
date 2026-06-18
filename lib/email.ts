@@ -1,12 +1,14 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 const FROM = "Ads My Ride <noreply@adsmyride.com>";
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://adsmyride.com";
 
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY);
+}
+
 export async function sendWelcomeEmail(to: string, name: string) {
-  await resend.emails.send({
+  await getResend().emails.send({
     from: FROM,
     to,
     subject: "Bienvenue sur Ads My Ride 🚗",
@@ -43,7 +45,7 @@ export async function sendWelcomeEmail(to: string, name: string) {
 export async function sendPasswordResetEmail(to: string, token: string) {
   const resetUrl = `${BASE_URL}/auth/reset-password?token=${token}`;
 
-  await resend.emails.send({
+  await getResend().emails.send({
     from: FROM,
     to,
     subject: "Réinitialisation de ton mot de passe",
