@@ -69,7 +69,7 @@ export default async function AdDetailPage({ params }: { params: Promise<{ id: s
                 Véhicules éligibles ({ad.eligibleModels.length} modèles)
               </h2>
               <div className="space-y-4">
-                {Object.entries(groupedModels).map(([brand, models]) => (
+                {Object.entries(groupedModels).map(([brand, models]: [string, string[]]) => (
                   <div key={brand}>
                     <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">{brand}</p>
                     <div className="flex flex-wrap gap-2">
