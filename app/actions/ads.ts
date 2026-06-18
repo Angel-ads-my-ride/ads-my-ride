@@ -104,7 +104,7 @@ export async function applyToAd(_prev: AdState, formData: FormData): Promise<AdS
   }
 
   const isEligible = ad.eligibleModels.some(
-    (m) =>
+    (m: { brand: string; model: string }) =>
       m.brand.toLowerCase() === user.carBrand!.toLowerCase() &&
       m.model.toLowerCase() === user.carModel!.toLowerCase()
   );
