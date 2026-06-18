@@ -1,9 +1,29 @@
 "use server";
 
+import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { getSession } from "@/lib/session";
+import bcrypt from "bcryptjs";
+import { getSession, createSession } from "@/lib/session";
 import { db } from "@/lib/db";
 import { sendAdApproved, sendAdRejected, sendAdNeedsModification } from "@/lib/email";
+
+type AuthState = { error?: string } | undefined;
+
+export async function loginAdmin(_prev: AuthState, formData: FormData): Promise<AuthState> {
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+
+  if (!email || !password) return { error: "Email et mot de passe requis." };
+
+  const user = await db.user.findUnique({ where: { email } });
+  if (!user || user.role !== "SUPER_ADMIN") return { error: "Identifiants incorrects." };
+
+  const valid = await bcrypt.compare(password, user.password);
+  if (!valid) return { error: "Identifiants incorrects." };
+
+  await createSession(user.id, user.role);
+  redirect("/admin");
+}
 
 async function requireAdmin() {
   const session = await getSession();
