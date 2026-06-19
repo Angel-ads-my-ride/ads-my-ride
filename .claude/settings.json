@@ -26,7 +26,12 @@
       "Bash(git commit -m 'fix: remove middleware.ts from git tracking *)",
       "Bash(python3)",
       "Bash(git commit -m 'style: yellow primary color + Logo.png replaces A badge everywhere *)",
-      "Bash(git commit -m 'style: remove '\\\\''Ads My Ride'\\\\'' text next to logo everywhere *)"
+      "Bash(git commit -m 'style: remove '\\\\''Ads My Ride'\\\\'' text next to logo everywhere *)",
+      "Bash(sed -i '' 's|className=\"w-6 h-6 object-contain\"|className=\"w-10 h-10 object-contain\"|g' app/advertiser/ads/new/page.tsx app/ads/[id]/page.tsx app/advertiser/ads/[id]/page.tsx)",
+      "Bash(sed -i '' 's|className=\"w-7 h-7 object-contain\"|className=\"w-10 h-10 object-contain\"|g' app/advertiser/dashboard/page.tsx app/admin/layout.tsx app/dashboard/page.tsx)",
+      "Bash(sed -i '' 's|className=\"w-8 h-8 object-contain\"|className=\"w-10 h-10 object-contain\"|g' app/advertiser/auth/register/page.tsx app/advertiser/auth/login/page.tsx app/auth/register/page.tsx app/auth/forgot-password/page.tsx app/auth/login/page.tsx app/auth/reset-password/page.tsx components/Navbar.tsx)",
+      "Bash(sed -i '' 's|className=\"w-12 h-12 object-contain mx-auto mb-4\"|className=\"w-20 h-20 object-contain mx-auto mb-4\"|g' app/admin/login/page.tsx)",
+      "Bash(git commit -m 'style: increase logo size across all pages *)"
     ],
     "additionalDirectories": [
       "/Users/gegellicorne/Desktop/Ads My Ride/app/admin/ads"

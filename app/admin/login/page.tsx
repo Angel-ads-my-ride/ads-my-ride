@@ -10,7 +10,7 @@ export default function AdminLoginPage() {
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <img src="/Logo.png" alt="Ads My Ride" className="w-12 h-12 object-contain mx-auto mb-4" />
+          <img src="/Logo.png" alt="Ads My Ride" className="w-20 h-20 object-contain mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-white">Admin</h1>
           <p className="text-zinc-500 text-sm mt-1">Ads My Ride — Super Admin</p>
         </div>

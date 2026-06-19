@@ -20,7 +20,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <aside className="w-60 flex-shrink-0 bg-zinc-900 border-r border-zinc-800 flex flex-col">
         <div className="p-5 border-b border-zinc-800">
           <Link href="/">
-            <img src="/Logo.png" alt="Ads My Ride" className="w-7 h-7 object-contain" />
+            <img src="/Logo.png" alt="Ads My Ride" className="w-10 h-10 object-contain" />
           </Link>
         </div>
 

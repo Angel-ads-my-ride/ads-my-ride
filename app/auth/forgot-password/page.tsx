@@ -13,7 +13,7 @@ export default function ForgotPasswordPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-6">
-            <img src="/Logo.png" alt="Ads My Ride" className="w-8 h-8 object-contain" />
+            <img src="/Logo.png" alt="Ads My Ride" className="w-10 h-10 object-contain" />
             <span className="font-bold text-lg text-gray-900">
             </span>
           </Link>

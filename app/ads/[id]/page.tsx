@@ -43,7 +43,7 @@ export default async function AdDetailPage({ params }: { params: Promise<{ id: s
             <ArrowLeft className="w-4 h-4" /> Retour aux annonces
           </Link>
           <Link href="/" className="flex items-center gap-2">
-            <img src="/Logo.png" alt="Ads My Ride" className="w-6 h-6 object-contain" />
+            <img src="/Logo.png" alt="Ads My Ride" className="w-10 h-10 object-contain" />
           </Link>
         </div>
       </header>
