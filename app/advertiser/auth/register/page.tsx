@@ -14,7 +14,6 @@ export default function AdvertiserRegisterPage() {
           <Link href="/" className="inline-flex items-center gap-2 mb-6">
             <img src="/Logo.png" alt="Ads My Ride" className="w-8 h-8 object-contain" />
             <span className="font-bold text-lg text-gray-900">
-              Ads <span className="text-zinc-700">My Ride</span>
             </span>
           </Link>
           <div className="inline-flex items-center gap-2 bg-gray-100 border border-gray-200 text-gray-600 text-xs px-3 py-1.5 rounded-full mb-3 font-medium">

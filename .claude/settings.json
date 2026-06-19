@@ -25,7 +25,8 @@
       "Bash(git rm *)",
       "Bash(git commit -m 'fix: remove middleware.ts from git tracking *)",
       "Bash(python3)",
-      "Bash(git commit -m 'style: yellow primary color + Logo.png replaces A badge everywhere *)"
+      "Bash(git commit -m 'style: yellow primary color + Logo.png replaces A badge everywhere *)",
+      "Bash(git commit -m 'style: remove '\\\\''Ads My Ride'\\\\'' text next to logo everywhere *)"
     ],
     "additionalDirectories": [
       "/Users/gegellicorne/Desktop/Ads My Ride/app/admin/ads"

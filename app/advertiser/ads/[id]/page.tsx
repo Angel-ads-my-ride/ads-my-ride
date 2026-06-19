@@ -59,7 +59,6 @@ export default async function AdvertiserAdDetailPage({ params }: { params: Promi
           <Link href="/" className="flex items-center gap-2">
             <img src="/Logo.png" alt="Ads My Ride" className="w-6 h-6 object-contain" />
             <span className="font-bold text-sm">
-              Ads <span className="text-zinc-700">My Ride</span>
             </span>
           </Link>
         </div>

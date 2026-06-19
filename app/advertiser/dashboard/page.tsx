@@ -33,7 +33,6 @@ export default async function AdvertiserDashboardPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <img src="/Logo.png" alt="Ads My Ride" className="w-7 h-7 object-contain" />
-            <span className="font-bold text-gray-900">Ads <span className="text-zinc-700">My Ride</span></span>
           </Link>
           <div className="flex items-center gap-4">
             <span className="text-gray-500 text-sm hidden sm:block">{user.companyName ?? user.name}</span>

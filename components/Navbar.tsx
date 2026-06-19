@@ -24,7 +24,6 @@ export default function Navbar({ role }: { role?: string | null }) {
         <Link href="/" className="flex items-center gap-2">
           <img src="/Logo.png" alt="Ads My Ride" className="w-8 h-8 object-contain" />
           <span className="font-bold text-lg tracking-tight text-gray-900">
-            Ads <span className="text-zinc-700">My Ride</span>
           </span>
         </Link>
 

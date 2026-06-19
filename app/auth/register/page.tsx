@@ -18,7 +18,6 @@ export default function RegisterPage() {
           <Link href="/" className="inline-flex items-center gap-2 mb-6">
             <img src="/Logo.png" alt="Ads My Ride" className="w-8 h-8 object-contain" />
             <span className="font-bold text-lg text-gray-900">
-              Ads <span className="text-zinc-700">My Ride</span>
             </span>
           </Link>
           <h1 className="text-2xl font-bold text-gray-900">Créer un compte</h1>
