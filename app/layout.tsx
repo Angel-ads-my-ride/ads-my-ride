@@ -5,7 +5,7 @@ import "./globals.css";
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist-sans" });
 
 export const metadata: Metadata = {
-  title: "Ads My Ride — Monétisez votre voiture",
+  title: "Ads My Ride — Monétisez votre véhicule de transport",
   description:
     "Gagnez de l'argent en affichant des publicités sur votre voiture. Choisissez une campagne, posez le covering chez un partenaire, et touchez vos gains.",
 };
