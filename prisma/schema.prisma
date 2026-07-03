@@ -20,6 +20,7 @@ model User {
   phone       String?
   address     String?
   earnings    Float    @default(0)
+  avatarUrl   String?  @db.Text
 
   companyName String?
   website     String?
@@ -52,7 +53,7 @@ model Ad {
   updatedAt       DateTime @updatedAt
 
   advertiserId    String
-  advertiser      User     @relation(fields: [advertiserId], references: [id])
+  advertiser      User     @relation(fields: [advertiserId], references: [id], onDelete: Cascade)
 
   eligibleModels  AdCarModel[]
   bookings        Booking[]
@@ -95,8 +96,8 @@ model Booking {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  user        User      @relation(fields: [userId], references: [id])
-  ad          Ad        @relation(fields: [adId], references: [id])
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ad          Ad        @relation(fields: [adId], references: [id], onDelete: Cascade)
 
   @@map("bookings")
 }

@@ -2,8 +2,17 @@
 
 import { useActionState } from "react";
 import { updateAdvertiserProfile } from "@/app/actions/auth";
+import AvatarUpload from "@/components/AvatarUpload";
 
-export default function ProfileForm({ companyName, siret }: { companyName: string | null; siret: string | null }) {
+export default function ProfileForm({
+  companyName,
+  siret,
+  avatarUrl,
+}: {
+  companyName: string | null;
+  siret: string | null;
+  avatarUrl: string | null;
+}) {
   const [state, action, pending] = useActionState(updateAdvertiserProfile, undefined);
 
   return (
@@ -14,6 +23,8 @@ export default function ProfileForm({ companyName, siret }: { companyName: strin
       {state?.success && (
         <div className="bg-green-50 border border-green-200 text-green-600 text-sm px-4 py-3 rounded-xl">Informations mises à jour.</div>
       )}
+
+      <AvatarUpload currentUrl={avatarUrl} name={companyName ?? "Annonceur"} />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>

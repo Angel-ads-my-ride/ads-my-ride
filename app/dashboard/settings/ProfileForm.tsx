@@ -4,8 +4,19 @@ import { useActionState, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { updateCustomerProfile } from "@/app/actions/auth";
 import { CAR_DATA, getModelsForBrand } from "@/lib/car-data";
+import AvatarUpload from "@/components/AvatarUpload";
 
-export default function ProfileForm({ initialBrand, initialModel }: { initialBrand: string | null; initialModel: string | null }) {
+export default function ProfileForm({
+  initialBrand,
+  initialModel,
+  name,
+  avatarUrl,
+}: {
+  initialBrand: string | null;
+  initialModel: string | null;
+  name: string;
+  avatarUrl: string | null;
+}) {
   const [state, action, pending] = useActionState(updateCustomerProfile, undefined);
   const [selectedBrand, setSelectedBrand] = useState(initialBrand ?? "");
   const models = selectedBrand ? getModelsForBrand(selectedBrand) : [];
@@ -18,6 +29,8 @@ export default function ProfileForm({ initialBrand, initialModel }: { initialBra
       {state?.success && (
         <div className="bg-green-50 border border-green-200 text-green-600 text-sm px-4 py-3 rounded-xl">Véhicule mis à jour.</div>
       )}
+
+      <AvatarUpload currentUrl={avatarUrl} name={name} />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>

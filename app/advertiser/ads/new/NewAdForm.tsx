@@ -14,6 +14,18 @@ export default function NewAdForm() {
   const [addModel, setAddModel] = useState("");
   const [isConfidential, setIsConfidential] = useState(false);
   const [autoAccept, setAutoAccept] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) {
+      setImagePreview(null);
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setImagePreview(reader.result as string);
+    reader.readAsDataURL(file);
+  }
 
   const addModelsForBrand = getModelsForBrand(addBrand);
 
@@ -72,9 +84,12 @@ export default function NewAdForm() {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            URL de l&apos;image / visuel <span className="text-gray-400 font-normal">(optionnel)</span>
+            Image / visuel <span className="text-gray-400 font-normal">(optionnel, 5 Mo max)</span>
           </label>
-          <input name="imageUrl" type="url" placeholder="https://cdn.mamarque.fr/campagne.jpg" className={inputCls} />
+          <input name="imageFile" type="file" accept="image/*" onChange={handleImageChange} className={`${inputCls} file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-zinc-100 file:text-zinc-700 file:text-sm file:font-medium`} />
+          {imagePreview && (
+            <img src={imagePreview} alt="Aperçu" className="mt-3 w-full max-h-56 object-cover rounded-xl border border-gray-200" />
+          )}
         </div>
       </div>
 

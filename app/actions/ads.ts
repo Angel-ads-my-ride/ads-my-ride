@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { getSession } from "@/lib/session";
 import { db } from "@/lib/db";
 import { sendAdSubmittedToAdmin, sendBookingAccepted, sendBookingRejected } from "@/lib/email";
+import { fileToAdImageDataUri, ImageTooLargeError } from "@/lib/image";
 
 type AdState = { error?: string; success?: boolean } | undefined;
 
@@ -16,7 +17,7 @@ export async function createAd(_prev: AdState, formData: FormData): Promise<AdSt
   const description = formData.get("description") as string;
   const pricePerDay = parseFloat(formData.get("pricePerDay") as string);
   const totalBudget = parseFloat(formData.get("totalBudget") as string);
-  const imageUrl = formData.get("imageUrl") as string;
+  const imageFile = formData.get("imageFile") as File | null;
   const isConfidential = formData.get("isConfidential") === "true";
   const maxApplicants = formData.get("maxApplicants") ? parseInt(formData.get("maxApplicants") as string) : null;
   const autoAccept = formData.get("autoAccept") === "true";
@@ -27,6 +28,13 @@ export async function createAd(_prev: AdState, formData: FormData): Promise<AdSt
   }
   if (pricePerDay <= 0 || totalBudget <= 0) {
     return { error: "Les montants doivent être positifs." };
+  }
+
+  let imageUrl: string | null = null;
+  try {
+    imageUrl = await fileToAdImageDataUri(imageFile);
+  } catch (err) {
+    return { error: err instanceof ImageTooLargeError ? err.message : "Image invalide." };
   }
 
   let eligibleModels: { brand: string; model: string }[] = [];
@@ -42,7 +50,9 @@ export async function createAd(_prev: AdState, formData: FormData): Promise<AdSt
 
   const advertiser = await db.user.findUnique({ where: { id: session.userId }, select: { name: true } });
 
-  await db.ad.create({
+  // Nested relation writes require a transaction, which the Neon HTTP driver
+  // doesn't support — create the ad, then the eligible models, separately.
+  const ad = await db.ad.create({
     data: {
       title,
       description,
@@ -56,9 +66,13 @@ export async function createAd(_prev: AdState, formData: FormData): Promise<AdSt
       status: "PENDING_REVIEW",
       isActive: false,
       advertiserId: session.userId,
-      eligibleModels: { create: eligibleModels },
     },
   });
+
+  // createMany also requires a transaction under the Neon HTTP driver, so insert one by one.
+  for (const m of eligibleModels) {
+    await db.adCarModel.create({ data: { adId: ad.id, brand: m.brand, model: m.model } });
+  }
 
   sendAdSubmittedToAdmin(title, advertiser?.name ?? "").catch(() => null);
 
@@ -70,10 +84,12 @@ export async function toggleAdActive(adId: string, newState: boolean) {
   const session = await getSession();
   if (!session || session.role !== "ADVERTISER") return;
 
-  await db.ad.updateMany({
-    where: { id: adId, advertiserId: session.userId },
-    data: { isActive: newState },
-  });
+  // updateMany requires a transaction, which the Neon HTTP driver doesn't support
+  // once it actually has a row to update — verify ownership, then update by id.
+  const ad = await db.ad.findFirst({ where: { id: adId, advertiserId: session.userId }, select: { id: true } });
+  if (!ad) return;
+
+  await db.ad.update({ where: { id: ad.id }, data: { isActive: newState } });
 
   revalidatePath("/advertiser/dashboard");
 }
@@ -82,9 +98,10 @@ export async function deleteAd(adId: string) {
   const session = await getSession();
   if (!session || session.role !== "ADVERTISER") return;
 
-  await db.ad.deleteMany({
-    where: { id: adId, advertiserId: session.userId },
-  });
+  const ad = await db.ad.findFirst({ where: { id: adId, advertiserId: session.userId }, select: { id: true } });
+  if (!ad) return;
+
+  await db.ad.delete({ where: { id: ad.id } });
 
   revalidatePath("/advertiser/dashboard");
 }

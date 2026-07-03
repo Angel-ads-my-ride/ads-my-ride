@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { createSession, deleteSession, getSession } from "@/lib/session";
 import { sendWelcomeEmail } from "@/lib/email";
+import { fileToAvatarDataUri, ImageTooLargeError } from "@/lib/image";
 
 type AuthState = { error?: string; success?: boolean } | undefined;
 
@@ -132,9 +133,20 @@ export async function updateCustomerProfile(
 
   const carBrand = (formData.get("carBrand") as string) || null;
   const carModel = (formData.get("carModel") as string) || null;
+  const avatarFile = formData.get("avatarFile") as File | null;
+
+  let avatarUrl: string | null | undefined;
+  try {
+    avatarUrl = await fileToAvatarDataUri(avatarFile);
+  } catch (err) {
+    return { error: err instanceof ImageTooLargeError ? err.message : "Image invalide." };
+  }
 
   try {
-    await db.user.update({ where: { id: session.userId }, data: { carBrand, carModel } });
+    await db.user.update({
+      where: { id: session.userId },
+      data: { carBrand, carModel, ...(avatarUrl ? { avatarUrl } : {}) },
+    });
   } catch {
     return { error: "Une erreur est survenue. Veuillez réessayer." };
   }
@@ -152,13 +164,24 @@ export async function updateAdvertiserProfile(
 
   const companyName = formData.get("companyName") as string;
   const siret = (formData.get("siret") as string) || null;
+  const avatarFile = formData.get("avatarFile") as File | null;
 
   if (!companyName) {
     return { error: "Le nom de l'entreprise est requis." };
   }
 
+  let avatarUrl: string | null | undefined;
   try {
-    await db.user.update({ where: { id: session.userId }, data: { companyName, siret } });
+    avatarUrl = await fileToAvatarDataUri(avatarFile);
+  } catch (err) {
+    return { error: err instanceof ImageTooLargeError ? err.message : "Image invalide." };
+  }
+
+  try {
+    await db.user.update({
+      where: { id: session.userId },
+      data: { companyName, siret, ...(avatarUrl ? { avatarUrl } : {}) },
+    });
   } catch {
     return { error: "Une erreur est survenue. Veuillez réessayer." };
   }

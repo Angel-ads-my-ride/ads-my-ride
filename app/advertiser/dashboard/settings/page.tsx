@@ -35,7 +35,7 @@ export default async function AdvertiserSettingsPage() {
 
       <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
         <h2 className="font-semibold text-gray-900 mb-4">Entreprise</h2>
-        <ProfileForm companyName={user.companyName} siret={user.siret} />
+        <ProfileForm companyName={user.companyName} siret={user.siret} avatarUrl={user.avatarUrl} />
       </div>
 
       <DangerZone deleteAction={deleteOwnAccount} />

@@ -34,8 +34,13 @@ export default async function DashboardSettingsPage() {
       </div>
 
       <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-        <h2 className="font-semibold text-gray-900 mb-4">Mon véhicule</h2>
-        <ProfileForm initialBrand={user.carBrand} initialModel={user.carModel} />
+        <h2 className="font-semibold text-gray-900 mb-4">Profil &amp; véhicule</h2>
+        <ProfileForm
+          initialBrand={user.carBrand}
+          initialModel={user.carModel}
+          name={user.name}
+          avatarUrl={user.avatarUrl}
+        />
       </div>
 
       <DangerZone deleteAction={deleteOwnAccount} />

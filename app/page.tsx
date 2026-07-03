@@ -9,7 +9,7 @@ export default async function HomePage() {
     .findMany({
       where: { isActive: true, status: "APPROVED", remainingBudget: { gt: 0 } },
       include: {
-        advertiser: { select: { name: true, companyName: true } },
+        advertiser: { select: { name: true, companyName: true, avatarUrl: true } },
         eligibleModels: true,
       },
       orderBy: { createdAt: "desc" },

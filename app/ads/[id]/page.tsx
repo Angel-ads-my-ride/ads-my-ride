@@ -13,7 +13,7 @@ export default async function AdDetailPage({ params }: { params: Promise<{ id: s
   const ad = await db.ad.findUnique({
     where: { id, status: "APPROVED" },
     include: {
-      advertiser: { select: { companyName: true, name: true } },
+      advertiser: { select: { companyName: true, name: true, avatarUrl: true } },
       eligibleModels: true,
       _count: { select: { bookings: true } },
     },
@@ -65,7 +65,14 @@ export default async function AdDetailPage({ params }: { params: Promise<{ id: s
             </div>
 
             <div>
-              <p className="text-zinc-700 text-sm font-semibold mb-1">{ad.advertiser.companyName ?? ad.advertiser.name}</p>
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-7 h-7 rounded-full overflow-hidden bg-zinc-100 flex-shrink-0">
+                  {ad.advertiser.avatarUrl && (
+                    <img src={ad.advertiser.avatarUrl} alt="" className="w-full h-full object-cover" />
+                  )}
+                </div>
+                <p className="text-zinc-700 text-sm font-semibold">{ad.advertiser.companyName ?? ad.advertiser.name}</p>
+              </div>
               <h1 className="text-3xl font-bold text-gray-900 mb-3">{ad.title}</h1>
               <p className="text-gray-500 leading-relaxed">{ad.description}</p>
             </div>

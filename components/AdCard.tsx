@@ -10,7 +10,7 @@ type Ad = {
   description: string;
   imageUrl: string | null;
   pricePerDay: number;
-  advertiser: { companyName: string | null; name: string };
+  advertiser: { companyName: string | null; name: string; avatarUrl: string | null };
   eligibleModels: { brand: string; model: string }[];
 };
 
@@ -57,9 +57,16 @@ export default function AdCard({ ad, userBrand, userModel }: { ad: Ad; userBrand
       </div>
 
       <div className="p-5">
-        <span className="text-xs text-zinc-700 font-semibold uppercase tracking-wider">
-          {ad.advertiser.companyName ?? ad.advertiser.name}
-        </span>
+        <div className="flex items-center gap-2 mb-1">
+          <div className="w-5 h-5 rounded-full overflow-hidden bg-zinc-100 flex-shrink-0">
+            {ad.advertiser.avatarUrl && (
+              <img src={ad.advertiser.avatarUrl} alt="" className="w-full h-full object-cover" />
+            )}
+          </div>
+          <span className="text-xs text-zinc-700 font-semibold uppercase tracking-wider">
+            {ad.advertiser.companyName ?? ad.advertiser.name}
+          </span>
+        </div>
         <h3 className="font-bold text-gray-900 text-base mt-1 mb-2 leading-snug">{ad.title}</h3>
         <p className="text-gray-500 text-sm leading-relaxed mb-4 line-clamp-2">{ad.description}</p>
 

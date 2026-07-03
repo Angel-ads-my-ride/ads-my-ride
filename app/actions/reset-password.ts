@@ -15,7 +15,12 @@ export async function requestPasswordReset(_prev: State, formData: FormData): Pr
     const user = await db.user.findUnique({ where: { email } });
 
     if (user) {
-      await db.passwordResetToken.deleteMany({ where: { email } });
+      // deleteMany requires a transaction, which the Neon HTTP driver doesn't
+      // support once it actually has a row to delete — delete one by one instead.
+      const existingTokens = await db.passwordResetToken.findMany({ where: { email }, select: { id: true } });
+      for (const t of existingTokens) {
+        await db.passwordResetToken.delete({ where: { id: t.id } });
+      }
 
       const token = randomBytes(32).toString("hex");
       const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1h

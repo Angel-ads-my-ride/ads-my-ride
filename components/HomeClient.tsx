@@ -13,7 +13,7 @@ type Ad = {
   description: string;
   imageUrl: string | null;
   pricePerDay: number;
-  advertiser: { name: string; companyName: string | null };
+  advertiser: { name: string; companyName: string | null; avatarUrl: string | null };
   eligibleModels: { brand: string; model: string }[];
 };
 
