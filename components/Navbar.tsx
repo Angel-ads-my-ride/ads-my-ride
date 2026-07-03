@@ -58,7 +58,7 @@ export default function Navbar({ role }: { role?: string | null }) {
                 Connexion
               </Link>
               <Link
-                href="/auth/register"
+                href="/register"
                 className="text-sm bg-zinc-700 hover:bg-zinc-800 text-zinc-900 px-4 py-2 rounded-lg transition-colors font-semibold shadow-sm"
               >
                 S&apos;inscrire

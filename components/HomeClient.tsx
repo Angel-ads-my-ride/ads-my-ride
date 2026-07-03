@@ -155,7 +155,7 @@ export default function HomeClient({ ads, initialBrand, initialModel, isLoggedIn
           {!isLoggedIn && (
             <p className="mt-4 text-gray-400 text-sm">
               Pas encore inscrit ?{" "}
-              <Link href="/auth/register" className="text-zinc-700 hover:text-zinc-800 font-semibold">
+              <Link href="/register" className="text-zinc-700 hover:text-zinc-800 font-semibold">
                 Créer un compte
               </Link>
             </p>

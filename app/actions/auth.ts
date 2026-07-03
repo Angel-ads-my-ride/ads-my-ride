@@ -57,7 +57,7 @@ export async function loginCustomer(
 
   try {
     const user = await db.user.findUnique({ where: { email } });
-    if (!user || user.role !== "CUSTOMER") {
+    if (!user || (user.role !== "CUSTOMER" && user.role !== "SUPER_ADMIN")) {
       return { error: "Identifiants incorrects." };
     }
 
@@ -66,7 +66,9 @@ export async function loginCustomer(
       return { error: "Identifiants incorrects." };
     }
 
-    await createSession(user.id, user.role);
+    // Le super admin peut se connecter ici pour simuler le côté client ; sa session
+    // prend alors le rôle CUSTOMER (son rôle SUPER_ADMIN reste inchangé en base).
+    await createSession(user.id, "CUSTOMER");
   } catch {
     return { error: "Une erreur est survenue. Veuillez réessayer." };
   }
@@ -122,7 +124,7 @@ export async function loginAdvertiser(
 
   try {
     const user = await db.user.findUnique({ where: { email } });
-    if (!user || user.role !== "ADVERTISER") {
+    if (!user || (user.role !== "ADVERTISER" && user.role !== "SUPER_ADMIN")) {
       return { error: "Identifiants incorrects." };
     }
 
@@ -131,7 +133,9 @@ export async function loginAdvertiser(
       return { error: "Identifiants incorrects." };
     }
 
-    await createSession(user.id, user.role);
+    // Le super admin peut se connecter ici pour simuler le côté annonceur ; sa session
+    // prend alors le rôle ADVERTISER (son rôle SUPER_ADMIN reste inchangé en base).
+    await createSession(user.id, "ADVERTISER");
   } catch {
     return { error: "Une erreur est survenue. Veuillez réessayer." };
   }
