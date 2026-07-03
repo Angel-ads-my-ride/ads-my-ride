@@ -2,22 +2,20 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
-import { loginCustomer } from "@/app/actions/auth";
+import { loginUser } from "@/app/actions/auth";
 
 export default function LoginPage() {
-  const [state, action, pending] = useActionState(loginCustomer, undefined);
+  const [state, action, pending] = useActionState(loginUser, undefined);
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-6">
-            <img src="/Logo.png" alt="Ads My Ride" className="w-10 h-10 object-contain" />
-            <span className="font-bold text-lg text-gray-900">
-            </span>
+            <img src="/Logo.png" alt="Ads My Ride" className="w-28 h-28 object-contain" />
           </Link>
           <h1 className="text-2xl font-bold text-gray-900">Connexion</h1>
-          <p className="text-gray-500 text-sm mt-1">Accédez à votre espace conducteur</p>
+          <p className="text-gray-500 text-sm mt-1">Accédez à votre compte</p>
         </div>
 
         <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
@@ -60,19 +58,12 @@ export default function LoginPage() {
           <div className="mt-6 pt-6 border-t border-gray-100 text-center">
             <p className="text-gray-500 text-sm">
               Pas encore de compte ?{" "}
-              <Link href="/auth/register" className="text-zinc-700 hover:text-zinc-800 font-semibold">
+              <Link href="/register" className="text-zinc-700 hover:text-zinc-800 font-semibold">
                 S&apos;inscrire
               </Link>
             </p>
           </div>
         </div>
-
-        <p className="text-center text-gray-400 text-xs mt-6">
-          Vous êtes annonceur ?{" "}
-          <Link href="/advertiser/auth/login" className="text-gray-500 hover:text-gray-700">
-            Connexion annonceur
-          </Link>
-        </p>
       </div>
     </div>
   );

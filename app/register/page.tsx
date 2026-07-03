@@ -59,10 +59,7 @@ export default function RegisterChoicePage() {
 
         <p className="mt-8 text-center text-gray-500 text-sm">
           Déjà un compte ?{" "}
-          <Link
-            href={tab === "customer" ? "/auth/login" : "/advertiser/auth/login"}
-            className="text-zinc-700 hover:text-zinc-800 font-semibold"
-          >
+          <Link href="/auth/login" className="text-zinc-700 hover:text-zinc-800 font-semibold">
             Se connecter
           </Link>
         </p>

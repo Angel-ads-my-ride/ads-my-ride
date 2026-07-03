@@ -22,7 +22,7 @@ export default function AdvertiserRegisterPage() {
           <div className="mt-6 pt-6 border-t border-gray-100 text-center">
             <p className="text-gray-500 text-sm">
               Déjà un compte ?{" "}
-              <Link href="/advertiser/auth/login" className="text-zinc-700 hover:text-zinc-800 font-semibold">Se connecter</Link>
+              <Link href="/auth/login" className="text-zinc-700 hover:text-zinc-800 font-semibold">Se connecter</Link>
             </p>
           </div>
         </div>

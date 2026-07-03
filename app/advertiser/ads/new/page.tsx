@@ -5,7 +5,7 @@ import NewAdForm from "./NewAdForm";
 
 export default async function NewAdPage() {
   const session = await getSession();
-  if (!session || session.role !== "ADVERTISER") redirect("/advertiser/auth/login");
+  if (!session || session.role !== "ADVERTISER") redirect("/auth/login");
 
   return (
     <div className="min-h-screen bg-gray-50">

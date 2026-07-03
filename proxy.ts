@@ -35,7 +35,7 @@ export async function proxy(request: NextRequest) {
 
   if (isAdvertiserRoute) {
     if (!payload || payload.role !== "ADVERTISER") {
-      return NextResponse.redirect(new URL("/advertiser/auth/login", request.url));
+      return NextResponse.redirect(new URL("/auth/login", request.url));
     }
   }
 

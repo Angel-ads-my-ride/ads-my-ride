@@ -8,7 +8,7 @@ import { Plus, Euro, Users, TrendingUp, BarChart3, Car, Power, Trash2, Eye, Penc
 
 export default async function AdvertiserDashboardPage() {
   const session = await getSession();
-  if (!session || session.role !== "ADVERTISER") redirect("/advertiser/auth/login");
+  if (!session || session.role !== "ADVERTISER") redirect("/auth/login");
 
   const user = await db.user.findUnique({
     where: { id: session.userId },
@@ -20,7 +20,7 @@ export default async function AdvertiserDashboardPage() {
     },
   });
 
-  if (!user) redirect("/advertiser/auth/login");
+  if (!user) redirect("/auth/login");
 
   const totalAds     = user.ads.length;
   const activeAds    = user.ads.filter((a) => a.isActive).length;

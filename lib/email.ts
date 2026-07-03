@@ -1,10 +1,22 @@
 import { Resend } from "resend";
 
 const FROM = "Ads My Ride <noreply@adsmyride.com>";
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://adsmyride.com";
+const BASE_URL = (process.env.NEXT_PUBLIC_APP_URL ?? "https://adsmyride.com").replace(/\/$/, "");
+const ICON_URL = `${BASE_URL}/icon.png`;
 
 function getResend() {
   return new Resend(process.env.RESEND_API_KEY);
+}
+
+function emailHeader(centered = false) {
+  return `
+    <div style="${centered ? "text-align:center;margin-bottom:32px;" : "margin-bottom:24px;"}">
+      <div style="display:inline-block;">
+        <img src="${ICON_URL}" alt="Ads My Ride" width="36" height="36" style="width:36px;height:36px;border-radius:10px;vertical-align:middle;display:inline-block;object-fit:contain;" />
+        <span style="font-weight:800;font-size:18px;color:#111;vertical-align:middle;margin-left:8px;">Ads <span style="color:#3f3f46;">My Ride</span></span>
+      </div>
+    </div>
+  `;
 }
 
 export async function sendWelcomeEmail(to: string, name: string) {
@@ -14,14 +26,7 @@ export async function sendWelcomeEmail(to: string, name: string) {
     subject: "Bienvenue sur Ads My Ride 🚗",
     html: `
       <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#fff;">
-        <div style="text-align:center;margin-bottom:32px;">
-          <div style="display:inline-flex;align-items:center;gap:8px;">
-            <div style="width:36px;height:36px;background:#3f3f46;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;">
-              <span style="color:#fff;font-weight:800;font-size:16px;">A</span>
-            </div>
-            <span style="font-weight:800;font-size:18px;color:#111;">Ads <span style="color:#3f3f46;">My Ride</span></span>
-          </div>
-        </div>
+        ${emailHeader(true)}
 
         <h1 style="font-size:22px;font-weight:700;color:#111;margin:0 0 8px;">Bienvenue, ${name} 👋</h1>
         <p style="color:#6b7280;font-size:15px;line-height:1.6;margin:0 0 24px;">
@@ -51,9 +56,7 @@ export async function sendAdSubmittedToAdmin(adTitle: string, advertiserName: st
     subject: `Nouvelle annonce à valider : ${adTitle}`,
     html: `
       <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#fff;">
-        <div style="margin-bottom:24px;">
-          <span style="font-weight:800;font-size:18px;color:#111;">Ads <span style="color:#3f3f46;">My Ride</span></span>
-        </div>
+        ${emailHeader()}
         <h1 style="font-size:20px;font-weight:700;color:#111;margin:0 0 8px;">Nouvelle annonce soumise</h1>
         <p style="color:#6b7280;font-size:15px;line-height:1.6;margin:0 0 24px;">
           <strong>${advertiserName}</strong> a soumis une annonce en attente de validation :<br/>
@@ -74,9 +77,7 @@ export async function sendAdApproved(to: string, adTitle: string) {
     subject: `✓ Votre annonce est publiée : ${adTitle}`,
     html: `
       <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#fff;">
-        <div style="margin-bottom:24px;">
-          <span style="font-weight:800;font-size:18px;color:#111;">Ads <span style="color:#3f3f46;">My Ride</span></span>
-        </div>
+        ${emailHeader()}
         <h1 style="font-size:20px;font-weight:700;color:#111;margin:0 0 8px;">Annonce approuvée !</h1>
         <p style="color:#6b7280;font-size:15px;line-height:1.6;margin:0 0 24px;">
           Votre annonce <strong style="color:#111;">${adTitle}</strong> a été validée et est maintenant visible sur la plateforme.
@@ -96,9 +97,7 @@ export async function sendAdRejected(to: string, adTitle: string, message: strin
     subject: `Annonce refusée : ${adTitle}`,
     html: `
       <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#fff;">
-        <div style="margin-bottom:24px;">
-          <span style="font-weight:800;font-size:18px;color:#111;">Ads <span style="color:#3f3f46;">My Ride</span></span>
-        </div>
+        ${emailHeader()}
         <h1 style="font-size:20px;font-weight:700;color:#111;margin:0 0 8px;">Annonce refusée</h1>
         <p style="color:#6b7280;font-size:15px;line-height:1.6;margin:0 0 16px;">
           Votre annonce <strong style="color:#111;">${adTitle}</strong> n'a pas pu être approuvée.
@@ -121,9 +120,7 @@ export async function sendAdNeedsModification(to: string, adTitle: string, messa
     subject: `Modifications demandées : ${adTitle}`,
     html: `
       <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#fff;">
-        <div style="margin-bottom:24px;">
-          <span style="font-weight:800;font-size:18px;color:#111;">Ads <span style="color:#3f3f46;">My Ride</span></span>
-        </div>
+        ${emailHeader()}
         <h1 style="font-size:20px;font-weight:700;color:#111;margin:0 0 8px;">Modifications demandées</h1>
         <p style="color:#6b7280;font-size:15px;line-height:1.6;margin:0 0 16px;">
           Votre annonce <strong style="color:#111;">${adTitle}</strong> nécessite des ajustements avant d'être publiée.
@@ -146,9 +143,7 @@ export async function sendBookingAccepted(to: string, adTitle: string) {
     subject: `Candidature acceptée : ${adTitle}`,
     html: `
       <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#fff;">
-        <div style="margin-bottom:24px;">
-          <span style="font-weight:800;font-size:18px;color:#111;">Ads <span style="color:#3f3f46;">My Ride</span></span>
-        </div>
+        ${emailHeader()}
         <h1 style="font-size:20px;font-weight:700;color:#111;margin:0 0 8px;">Candidature acceptée ! 🎉</h1>
         <p style="color:#6b7280;font-size:15px;line-height:1.6;margin:0 0 24px;">
           Votre candidature pour <strong style="color:#111;">${adTitle}</strong> a été acceptée. L'annonceur va vous contacter prochainement.
@@ -168,9 +163,7 @@ export async function sendBookingRejected(to: string, adTitle: string) {
     subject: `Candidature non retenue : ${adTitle}`,
     html: `
       <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#fff;">
-        <div style="margin-bottom:24px;">
-          <span style="font-weight:800;font-size:18px;color:#111;">Ads <span style="color:#3f3f46;">My Ride</span></span>
-        </div>
+        ${emailHeader()}
         <h1 style="font-size:20px;font-weight:700;color:#111;margin:0 0 8px;">Candidature non retenue</h1>
         <p style="color:#6b7280;font-size:15px;line-height:1.6;margin:0 0 24px;">
           Votre candidature pour <strong style="color:#111;">${adTitle}</strong> n'a pas été retenue cette fois. Continuez à parcourir les annonces !
@@ -192,14 +185,7 @@ export async function sendPasswordResetEmail(to: string, token: string) {
     subject: "Réinitialisation de ton mot de passe",
     html: `
       <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#fff;">
-        <div style="text-align:center;margin-bottom:32px;">
-          <div style="display:inline-flex;align-items:center;gap:8px;">
-            <div style="width:36px;height:36px;background:#3f3f46;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;">
-              <span style="color:#fff;font-weight:800;font-size:16px;">A</span>
-            </div>
-            <span style="font-weight:800;font-size:18px;color:#111;">Ads <span style="color:#3f3f46;">My Ride</span></span>
-          </div>
-        </div>
+        ${emailHeader(true)}
 
         <h1 style="font-size:22px;font-weight:700;color:#111;margin:0 0 8px;">Réinitialise ton mot de passe</h1>
         <p style="color:#6b7280;font-size:15px;line-height:1.6;margin:0 0 24px;">

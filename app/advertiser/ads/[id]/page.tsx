@@ -22,7 +22,7 @@ const AD_STATUS_BANNER: Record<string, { label: string; icon: typeof Clock; bg: 
 export default async function AdvertiserAdDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const session = await getSession();
-  if (!session || session.role !== "ADVERTISER") redirect("/advertiser/auth/login");
+  if (!session || session.role !== "ADVERTISER") redirect("/auth/login");
 
   const ad = await db.ad.findFirst({
     where: { id, advertiserId: session.userId },

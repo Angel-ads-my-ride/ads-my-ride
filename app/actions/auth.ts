@@ -44,7 +44,7 @@ export async function registerCustomer(
   redirect("/dashboard");
 }
 
-export async function loginCustomer(
+export async function loginUser(
   _prev: AuthState,
   formData: FormData
 ): Promise<AuthState> {
@@ -55,9 +55,13 @@ export async function loginCustomer(
     return { error: "Email et mot de passe requis." };
   }
 
+  let role: string;
   try {
     const user = await db.user.findUnique({ where: { email } });
-    if (!user || (user.role !== "CUSTOMER" && user.role !== "SUPER_ADMIN")) {
+    if (
+      !user ||
+      (user.role !== "CUSTOMER" && user.role !== "ADVERTISER" && user.role !== "SUPER_ADMIN")
+    ) {
       return { error: "Identifiants incorrects." };
     }
 
@@ -66,12 +70,14 @@ export async function loginCustomer(
       return { error: "Identifiants incorrects." };
     }
 
-    // Le super admin peut se connecter ici pour simuler le côté client ; sa session
-    // prend alors le rôle CUSTOMER (son rôle SUPER_ADMIN reste inchangé en base).
-    await createSession(user.id, "CUSTOMER");
+    await createSession(user.id, user.role);
+    role = user.role;
   } catch {
     return { error: "Une erreur est survenue. Veuillez réessayer." };
   }
+
+  if (role === "ADVERTISER") redirect("/advertiser/dashboard");
+  if (role === "SUPER_ADMIN") redirect("/admin");
   redirect("/dashboard");
 }
 
@@ -105,37 +111,6 @@ export async function registerAdvertiser(
 
     await createSession(user.id, user.role);
     sendWelcomeEmail(email, name).catch(() => null);
-  } catch {
-    return { error: "Une erreur est survenue. Veuillez réessayer." };
-  }
-  redirect("/advertiser/dashboard");
-}
-
-export async function loginAdvertiser(
-  _prev: AuthState,
-  formData: FormData
-): Promise<AuthState> {
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
-
-  if (!email || !password) {
-    return { error: "Email et mot de passe requis." };
-  }
-
-  try {
-    const user = await db.user.findUnique({ where: { email } });
-    if (!user || (user.role !== "ADVERTISER" && user.role !== "SUPER_ADMIN")) {
-      return { error: "Identifiants incorrects." };
-    }
-
-    const valid = await bcrypt.compare(password, user.password);
-    if (!valid) {
-      return { error: "Identifiants incorrects." };
-    }
-
-    // Le super admin peut se connecter ici pour simuler le côté annonceur ; sa session
-    // prend alors le rôle ADVERTISER (son rôle SUPER_ADMIN reste inchangé en base).
-    await createSession(user.id, "ADVERTISER");
   } catch {
     return { error: "Une erreur est survenue. Veuillez réessayer." };
   }
