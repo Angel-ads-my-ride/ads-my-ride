@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getSession } from "@/lib/session";
 import { db } from "@/lib/db";
-import { logout } from "@/app/actions/auth";
 import { toggleAdActive, deleteAd } from "@/app/actions/ads";
 import { Plus, Euro, Users, TrendingUp, BarChart3, Car, Power, Trash2, Eye, Pencil } from "lucide-react";
 
@@ -28,21 +27,7 @@ export default async function AdvertiserDashboardPage() {
   const totalSpent   = user.ads.reduce((s, a) => s + (a.totalBudget - a.remainingBudget), 0);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <img src="/Logo.png" alt="Ads My Ride" className="w-10 h-10 object-contain" />
-          </Link>
-          <div className="flex items-center gap-4">
-            <span className="text-gray-500 text-sm hidden sm:block">{user.companyName ?? user.name}</span>
-            <form action={logout}>
-              <button type="submit" className="text-sm text-gray-500 hover:text-gray-800 transition-colors">Déconnexion</button>
-            </form>
-          </div>
-        </div>
-      </header>
-
+    <>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
@@ -152,6 +137,6 @@ export default async function AdvertiserDashboardPage() {
           )}
         </div>
       </main>
-    </div>
+    </>
   );
 }

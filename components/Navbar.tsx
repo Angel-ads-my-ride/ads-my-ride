@@ -46,7 +46,7 @@ export default function Navbar({ role }: { role?: string | null }) {
             {t.nav.monDashboard}
           </Link>
           <form action="/api/auth/logout" method="POST">
-            <button type="submit" className="text-sm text-gray-500 hover:text-gray-800 transition-colors">
+            <button type="submit" className="text-sm text-gray-500 hover:text-red-600 border border-gray-300 hover:border-red-300 hover:bg-red-50 px-4 py-2 rounded-lg transition-colors font-medium">
               {t.nav.deconnexion}
             </button>
           </form>
@@ -58,7 +58,7 @@ export default function Navbar({ role }: { role?: string | null }) {
             {t.nav.dashboardAnnonceur}
           </Link>
           <form action="/api/auth/logout" method="POST">
-            <button type="submit" className="text-sm text-gray-500 hover:text-gray-800 transition-colors">
+            <button type="submit" className="text-sm text-gray-500 hover:text-red-600 border border-gray-300 hover:border-red-300 hover:bg-red-50 px-4 py-2 rounded-lg transition-colors font-medium">
               {t.nav.deconnexion}
             </button>
           </form>

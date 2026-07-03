@@ -1,9 +1,10 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
-import { createSession, deleteSession } from "@/lib/session";
+import { createSession, deleteSession, getSession } from "@/lib/session";
 import { sendWelcomeEmail } from "@/lib/email";
 
 type AuthState = { error?: string; success?: boolean } | undefined;
@@ -118,6 +119,59 @@ export async function registerAdvertiser(
 }
 
 export async function logout() {
+  await deleteSession();
+  redirect("/");
+}
+
+export async function updateCustomerProfile(
+  _prev: AuthState,
+  formData: FormData
+): Promise<AuthState> {
+  const session = await getSession();
+  if (!session || session.role !== "CUSTOMER") redirect("/auth/login");
+
+  const carBrand = (formData.get("carBrand") as string) || null;
+  const carModel = (formData.get("carModel") as string) || null;
+
+  try {
+    await db.user.update({ where: { id: session.userId }, data: { carBrand, carModel } });
+  } catch {
+    return { error: "Une erreur est survenue. Veuillez réessayer." };
+  }
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/settings");
+  return { success: true };
+}
+
+export async function updateAdvertiserProfile(
+  _prev: AuthState,
+  formData: FormData
+): Promise<AuthState> {
+  const session = await getSession();
+  if (!session || session.role !== "ADVERTISER") redirect("/auth/login");
+
+  const companyName = formData.get("companyName") as string;
+  const siret = (formData.get("siret") as string) || null;
+
+  if (!companyName) {
+    return { error: "Le nom de l'entreprise est requis." };
+  }
+
+  try {
+    await db.user.update({ where: { id: session.userId }, data: { companyName, siret } });
+  } catch {
+    return { error: "Une erreur est survenue. Veuillez réessayer." };
+  }
+  revalidatePath("/advertiser/dashboard");
+  revalidatePath("/advertiser/dashboard/settings");
+  return { success: true };
+}
+
+export async function deleteOwnAccount() {
+  const session = await getSession();
+  if (!session) redirect("/");
+
+  await db.user.delete({ where: { id: session.userId } });
   await deleteSession();
   redirect("/");
 }

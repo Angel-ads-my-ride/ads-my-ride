@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getSession } from "@/lib/session";
 import { db } from "@/lib/db";
-import { logout } from "@/app/actions/auth";
 import { Euro, Car, Calendar, TrendingUp, Clock, CheckCircle, XCircle, ArrowRight, Wallet } from "lucide-react";
 
 const STATUS_LABELS: Record<string, { label: string; color: string; icon: React.ElementType }> = {
@@ -34,21 +33,7 @@ export default async function DashboardPage() {
   const doneBookings   = user.bookings.filter((b) => b.status === "COMPLETED").length;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <img src="/Logo.png" alt="Ads My Ride" className="w-10 h-10 object-contain" />
-          </Link>
-          <div className="flex items-center gap-4">
-            <span className="text-gray-500 text-sm hidden sm:block">{user.email}</span>
-            <form action={logout}>
-              <button type="submit" className="text-sm text-gray-500 hover:text-gray-800 transition-colors">Déconnexion</button>
-            </form>
-          </div>
-        </div>
-      </header>
-
+    <>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900">Bonjour, {user.name} 👋</h1>
@@ -159,6 +144,6 @@ export default async function DashboardPage() {
           </div>
         </div>
       </main>
-    </div>
+    </>
   );
 }
