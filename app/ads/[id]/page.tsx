@@ -80,20 +80,57 @@ export default async function AdDetailPage({ params }: { params: Promise<{ id: s
             <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
               <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <Car className="w-4 h-4 text-zinc-700" />
-                Véhicules éligibles ({ad.eligibleModels.length} modèles)
+                Véhicules éligibles
               </h2>
-              <div className="space-y-4">
-                {(Object.entries(groupedModels) as [string, string[]][]).map(([brand, models]) => (
-                  <div key={brand}>
-                    <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">{brand}</p>
-                    <div className="flex flex-wrap gap-2">
-                      {models.map((model) => (
-                        <span key={model} className="bg-gray-100 text-gray-700 text-xs px-2.5 py-1 rounded-lg border border-gray-200">{model}</span>
-                      ))}
-                    </div>
+
+              {ad.eligibleModels.length === 0 ? (
+                <p className="text-gray-500 text-sm mb-4">
+                  {ad.modelSelectionMode === "MANUAL" ? "Aucun modèle défini." : "Tous les modèles sont acceptés."}
+                </p>
+              ) : (
+                <>
+                  <p className="text-gray-500 text-sm mb-4">
+                    {ad.modelSelectionMode === "MANUAL" ? "Modèles acceptés :" : "Tous les modèles, sauf :"}
+                  </p>
+                  <div className="space-y-4">
+                    {(Object.entries(groupedModels) as [string, string[]][]).map(([brand, models]) => (
+                      <div key={brand}>
+                        <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">{brand}</p>
+                        <div className="flex flex-wrap gap-2">
+                          {models.map((model) => (
+                            <span key={model} className="bg-gray-100 text-gray-700 text-xs px-2.5 py-1 rounded-lg border border-gray-200">{model}</span>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </>
+              )}
+
+              {(ad.countries.length > 0 || ad.vehicleConditions.length > 0) && (
+                <div className="flex flex-wrap gap-x-8 gap-y-3 mt-5 pt-5 border-t border-gray-100">
+                  {ad.countries.length > 0 && (
+                    <div>
+                      <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Pays</p>
+                      <div className="flex flex-wrap gap-2">
+                        {ad.countries.map((c) => (
+                          <span key={c} className="bg-gray-100 text-gray-700 text-xs px-2.5 py-1 rounded-lg border border-gray-200">{c}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {ad.vehicleConditions.length > 0 && (
+                    <div>
+                      <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">État du véhicule</p>
+                      <div className="flex flex-wrap gap-2">
+                        {ad.vehicleConditions.map((c) => (
+                          <span key={c} className="bg-gray-100 text-gray-700 text-xs px-2.5 py-1 rounded-lg border border-gray-200">{c}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 

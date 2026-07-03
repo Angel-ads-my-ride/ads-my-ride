@@ -12,18 +12,16 @@ type Ad = {
   pricePerDay: number;
   advertiser: { companyName: string | null; name: string; avatarUrl: string | null };
   eligibleModels: { brand: string; model: string }[];
+  modelSelectionMode: string;
 };
 
 export default function AdCard({ ad, userBrand, userModel }: { ad: Ad; userBrand?: string; userModel?: string }) {
   const { t } = useLocale();
+  const isListed = ad.eligibleModels.some(
+    (m) => m.brand.toLowerCase() === userBrand?.toLowerCase() && m.model.toLowerCase() === userModel?.toLowerCase()
+  );
   const isCompatible =
-    userBrand && userModel
-      ? ad.eligibleModels.some(
-          (m) =>
-            m.brand.toLowerCase() === userBrand.toLowerCase() &&
-            m.model.toLowerCase() === userModel.toLowerCase()
-        )
-      : true;
+    userBrand && userModel ? (ad.modelSelectionMode === "MANUAL" ? isListed : !isListed) : true;
 
   return (
     <div

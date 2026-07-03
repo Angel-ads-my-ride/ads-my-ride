@@ -52,6 +52,10 @@ model Ad {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
+  countries           String[] @default([])
+  vehicleConditions   String[] @default([])
+  modelSelectionMode  String   @default("ALL_EXCEPT")
+
   advertiserId    String
   advertiser      User     @relation(fields: [advertiserId], references: [id], onDelete: Cascade)
 

@@ -44,7 +44,12 @@ export async function sendWelcomeEmail(to: string, name: string) {
   });
 }
 
-export async function sendAdSubmittedToAdmin(adTitle: string, advertiserName: string) {
+export async function sendAdSubmittedToAdmin(
+  adTitle: string,
+  advertiserName: string,
+  companyName: string | null,
+  advertiserEmail: string
+) {
   const adminEmail = process.env.ADMIN_EMAIL;
   if (!adminEmail) return;
   await getResend().emails.send({
@@ -56,7 +61,7 @@ export async function sendAdSubmittedToAdmin(adTitle: string, advertiserName: st
         ${emailHeader()}
         <h1 style="font-size:20px;font-weight:700;color:#111;margin:0 0 8px;">Nouvelle annonce soumise</h1>
         <p style="color:#6b7280;font-size:15px;line-height:1.6;margin:0 0 24px;">
-          <strong>${advertiserName}</strong> a soumis une annonce en attente de validation :<br/>
+          <strong>${companyName ?? advertiserName}</strong> (${advertiserName} · ${advertiserEmail}) a soumis une annonce en attente de validation :<br/>
           <strong style="color:#111;">${adTitle}</strong>
         </p>
         <a href="${BASE_URL}/admin/ads" style="display:inline-block;background:#3f3f46;color:#fff;font-weight:700;font-size:15px;padding:12px 28px;border-radius:12px;text-decoration:none;">

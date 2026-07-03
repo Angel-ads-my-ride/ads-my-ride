@@ -15,7 +15,15 @@ type Ad = {
   pricePerDay: number;
   advertiser: { name: string; companyName: string | null; avatarUrl: string | null };
   eligibleModels: { brand: string; model: string }[];
+  modelSelectionMode: string;
 };
+
+function isModelEligible(ad: Ad, brand: string, model: string): boolean {
+  const isListed = ad.eligibleModels.some(
+    (m) => m.brand.toLowerCase() === brand.toLowerCase() && m.model.toLowerCase() === model.toLowerCase()
+  );
+  return ad.modelSelectionMode === "MANUAL" ? isListed : !isListed;
+}
 
 type Props = {
   ads: Ad[];
@@ -34,13 +42,7 @@ export default function HomeClient({ ads, initialBrand, initialModel, isLoggedIn
 
   const filteredAds =
     selectedBrand && selectedModel
-      ? ads.filter((ad) =>
-          ad.eligibleModels.some(
-            (m) =>
-              m.brand.toLowerCase() === selectedBrand.toLowerCase() &&
-              m.model.toLowerCase() === selectedModel.toLowerCase()
-          )
-        )
+      ? ads.filter((ad) => isModelEligible(ad, selectedBrand, selectedModel))
       : ads;
 
   function handleBrandChange(brand: string) {

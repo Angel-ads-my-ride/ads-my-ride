@@ -1,17 +1,20 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getSession } from "@/lib/session";
 import { db } from "@/lib/db";
 import { sendAdSubmittedToAdmin, sendBookingAccepted, sendBookingRejected } from "@/lib/email";
 import { fileToAdImageDataUri, ImageTooLargeError } from "@/lib/image";
 
-type AdState = { error?: string; success?: boolean } | undefined;
+type AdState = { error?: string; success?: boolean; isDraft?: boolean } | undefined;
 
-export async function createAd(_prev: AdState, formData: FormData): Promise<AdState> {
+export async function saveAd(_prev: AdState, formData: FormData): Promise<AdState> {
   const session = await getSession();
   if (!session || session.role !== "ADVERTISER") return { error: "Non autorisé." };
+
+  const adId = (formData.get("adId") as string) || null;
+  const intent = formData.get("intent") as string; // "publish" | "draft"
+  const isDraft = intent !== "publish";
 
   const title = formData.get("title") as string;
   const description = formData.get("description") as string;
@@ -22,19 +25,15 @@ export async function createAd(_prev: AdState, formData: FormData): Promise<AdSt
   const maxApplicants = formData.get("maxApplicants") ? parseInt(formData.get("maxApplicants") as string) : null;
   const autoAccept = formData.get("autoAccept") === "true";
   const eligibleModelsRaw = formData.get("eligibleModels") as string;
+  const countriesRaw = formData.get("countries") as string;
+  const vehicleConditionsRaw = formData.get("vehicleConditions") as string;
+  const modelSelectionMode = (formData.get("modelSelectionMode") as string) === "MANUAL" ? "MANUAL" : "ALL_EXCEPT";
 
   if (!title || !description || isNaN(pricePerDay) || isNaN(totalBudget)) {
     return { error: "Tous les champs obligatoires doivent être remplis." };
   }
   if (pricePerDay <= 0 || totalBudget <= 0) {
     return { error: "Les montants doivent être positifs." };
-  }
-
-  let imageUrl: string | null = null;
-  try {
-    imageUrl = await fileToAdImageDataUri(imageFile);
-  } catch (err) {
-    return { error: err instanceof ImageTooLargeError ? err.message : "Image invalide." };
   }
 
   let eligibleModels: { brand: string; model: string }[] = [];
@@ -44,40 +43,98 @@ export async function createAd(_prev: AdState, formData: FormData): Promise<AdSt
     return { error: "Les modèles éligibles sont invalides." };
   }
 
-  if (eligibleModels.length === 0) {
+  if (!isDraft && modelSelectionMode === "MANUAL" && eligibleModels.length === 0) {
     return { error: "Sélectionnez au moins un modèle de véhicule éligible." };
   }
 
-  const advertiser = await db.user.findUnique({ where: { id: session.userId }, select: { name: true } });
+  let countries: string[] = [];
+  try {
+    countries = JSON.parse(countriesRaw || "[]");
+  } catch {
+    countries = [];
+  }
 
-  // Nested relation writes require a transaction, which the Neon HTTP driver
-  // doesn't support — create the ad, then the eligible models, separately.
-  const ad = await db.ad.create({
-    data: {
-      title,
-      description,
-      pricePerDay,
-      totalBudget,
-      remainingBudget: totalBudget,
-      imageUrl: imageUrl || null,
-      isConfidential,
-      maxApplicants,
-      autoAccept,
-      status: "PENDING_REVIEW",
-      isActive: false,
-      advertiserId: session.userId,
-    },
-  });
+  let vehicleConditions: string[] = [];
+  try {
+    vehicleConditions = JSON.parse(vehicleConditionsRaw || "[]");
+  } catch {
+    vehicleConditions = [];
+  }
 
-  // createMany also requires a transaction under the Neon HTTP driver, so insert one by one.
+  let imageUrl: string | null = null;
+  try {
+    imageUrl = await fileToAdImageDataUri(imageFile);
+  } catch (err) {
+    return { error: err instanceof ImageTooLargeError ? err.message : "Image invalide." };
+  }
+
+  const status = isDraft ? "DRAFT" : "PENDING_REVIEW";
+
+  let ad;
+  if (adId) {
+    const existing = await db.ad.findFirst({ where: { id: adId, advertiserId: session.userId } });
+    if (!existing) return { error: "Annonce introuvable." };
+
+    ad = await db.ad.update({
+      where: { id: existing.id },
+      data: {
+        title,
+        description,
+        pricePerDay,
+        totalBudget,
+        remainingBudget: totalBudget,
+        imageUrl: imageUrl || existing.imageUrl,
+        isConfidential,
+        maxApplicants,
+        autoAccept,
+        status,
+        countries,
+        vehicleConditions,
+        modelSelectionMode,
+      },
+    });
+
+    // No createMany/deleteMany (require a transaction) — replace models one by one.
+    const oldModels = await db.adCarModel.findMany({ where: { adId: existing.id } });
+    for (const m of oldModels) {
+      await db.adCarModel.delete({ where: { id: m.id } });
+    }
+  } else {
+    ad = await db.ad.create({
+      data: {
+        title,
+        description,
+        pricePerDay,
+        totalBudget,
+        remainingBudget: totalBudget,
+        imageUrl: imageUrl || null,
+        isConfidential,
+        maxApplicants,
+        autoAccept,
+        status,
+        countries,
+        vehicleConditions,
+        modelSelectionMode,
+        isActive: false,
+        advertiserId: session.userId,
+      },
+    });
+  }
+
   for (const m of eligibleModels) {
     await db.adCarModel.create({ data: { adId: ad.id, brand: m.brand, model: m.model } });
   }
 
-  sendAdSubmittedToAdmin(title, advertiser?.name ?? "").catch(() => null);
+  if (!isDraft) {
+    const advertiser = await db.user.findUnique({
+      where: { id: session.userId },
+      select: { name: true, companyName: true, email: true },
+    });
+    sendAdSubmittedToAdmin(title, advertiser?.name ?? "", advertiser?.companyName ?? null, advertiser?.email ?? "").catch(() => null);
+  }
 
   revalidatePath("/advertiser/dashboard");
-  redirect("/advertiser/dashboard");
+  return { success: true, isDraft };
 }
 
 export async function toggleAdActive(adId: string, newState: boolean) {
@@ -131,11 +188,14 @@ export async function applyToAd(_prev: AdState, formData: FormData): Promise<AdS
     return { error: "Veuillez renseigner votre véhicule dans votre profil avant de candidater." };
   }
 
-  const isEligible = ad.eligibleModels.some(
+  const isListed = ad.eligibleModels.some(
     (m: { brand: string; model: string }) =>
       m.brand.toLowerCase() === user.carBrand!.toLowerCase() &&
       m.model.toLowerCase() === user.carModel!.toLowerCase()
   );
+  // ALL_EXCEPT: every model is eligible unless listed (excluded).
+  // MANUAL: only listed models are eligible.
+  const isEligible = ad.modelSelectionMode === "MANUAL" ? isListed : !isListed;
   if (!isEligible) return { error: "Votre véhicule n'est pas éligible pour cette annonce." };
 
   if (ad.maxApplicants) {
