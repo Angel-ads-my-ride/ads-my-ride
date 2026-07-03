@@ -11,10 +11,7 @@ function getResend() {
 function emailHeader(centered = false) {
   return `
     <div style="${centered ? "text-align:center;margin-bottom:32px;" : "margin-bottom:24px;"}">
-      <div style="display:inline-block;">
-        <img src="${ICON_URL}" alt="Ads My Ride" width="36" height="36" style="width:36px;height:36px;border-radius:10px;vertical-align:middle;display:inline-block;object-fit:contain;" />
-        <span style="font-weight:800;font-size:18px;color:#111;vertical-align:middle;margin-left:8px;">Ads <span style="color:#3f3f46;">My Ride</span></span>
-      </div>
+      <img src="${ICON_URL}" alt="Ads My Ride" width="48" height="48" style="width:48px;height:48px;border-radius:12px;display:inline-block;object-fit:contain;" />
     </div>
   `;
 }
