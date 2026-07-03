@@ -5,10 +5,10 @@ import { ArrowLeft, Car, Euro, Users, Eye, EyeOff, Clock, CheckCircle, XCircle, 
 import ReviewForm from "./ReviewForm";
 
 const STATUS_BADGE: Record<string, { label: string; color: string; icon: typeof Clock }> = {
-  PENDING_REVIEW:       { label: "En attente",   color: "text-yellow-400 bg-yellow-400/10 border-yellow-400/30", icon: Clock },
-  PENDING_MODIFICATION: { label: "Modification", color: "text-orange-400 bg-orange-400/10 border-orange-400/30", icon: AlertTriangle },
-  APPROVED:             { label: "Approuvée",    color: "text-green-400 bg-green-400/10 border-green-400/30",   icon: CheckCircle },
-  REJECTED:             { label: "Refusée",      color: "text-red-400 bg-red-400/10 border-red-400/30",         icon: XCircle },
+  PENDING_REVIEW:       { label: "En attente",   color: "text-amber-600 bg-amber-50 border-amber-200", icon: Clock },
+  PENDING_MODIFICATION: { label: "Modification", color: "text-orange-600 bg-orange-50 border-orange-200", icon: AlertTriangle },
+  APPROVED:             { label: "Approuvée",    color: "text-green-600 bg-green-50 border-green-200",   icon: CheckCircle },
+  REJECTED:             { label: "Refusée",      color: "text-red-600 bg-red-50 border-red-200",         icon: XCircle },
 };
 
 export default async function AdminAdReviewPage({ params }: { params: Promise<{ id: string }> }) {
@@ -36,20 +36,20 @@ export default async function AdminAdReviewPage({ params }: { params: Promise<{ 
 
   return (
     <div className="p-8">
-      <Link href="/admin/ads" className="inline-flex items-center gap-2 text-zinc-400 hover:text-white text-sm mb-6 transition-colors">
+      <Link href="/admin/ads" className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-900 text-sm mb-6 transition-colors">
         <ArrowLeft className="w-4 h-4" /> Retour aux annonces
       </Link>
 
       <div className="flex items-start gap-4 mb-6">
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-1">
-            <h1 className="text-2xl font-bold text-white">{ad.title}</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{ad.title}</h1>
             <span className={`flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full border ${badge.color}`}>
               <BadgeIcon className="w-3 h-3" />
               {badge.label}
             </span>
           </div>
-          <p className="text-zinc-400 text-sm">
+          <p className="text-gray-500 text-sm">
             Par {ad.advertiser.companyName ?? ad.advertiser.name} ({ad.advertiser.email}) · soumis le {new Date(ad.createdAt).toLocaleDateString("fr-FR")}
           </p>
         </div>
@@ -59,32 +59,32 @@ export default async function AdminAdReviewPage({ params }: { params: Promise<{ 
         {/* Ad details */}
         <div className="lg:col-span-2 space-y-5">
           {/* Image */}
-          <div className="aspect-video bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-800">
+          <div className="aspect-video bg-gray-100 rounded-2xl overflow-hidden border border-gray-200">
             {ad.isConfidential ? (
               <div className="w-full h-full flex flex-col items-center justify-center gap-2">
-                <EyeOff className="w-12 h-12 text-zinc-700" />
-                <p className="text-zinc-600 text-sm">Image confidentielle</p>
+                <EyeOff className="w-12 h-12 text-gray-300" />
+                <p className="text-gray-400 text-sm">Image confidentielle</p>
               </div>
             ) : ad.imageUrl ? (
               <img src={ad.imageUrl} alt={ad.title} className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
-                <Car className="w-16 h-16 text-zinc-700" />
+                <Car className="w-16 h-16 text-gray-300" />
               </div>
             )}
           </div>
 
           {/* Description */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-            <h2 className="font-semibold text-white mb-3">Description</h2>
-            <p className="text-zinc-400 text-sm leading-relaxed">{ad.description}</p>
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+            <h2 className="font-semibold text-gray-900 mb-3">Description</h2>
+            <p className="text-gray-500 text-sm leading-relaxed">{ad.description}</p>
           </div>
 
           {/* Admin message if any */}
           {ad.adminMessage && (
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-              <h2 className="font-semibold text-zinc-300 mb-2 text-sm">Dernier message admin</h2>
-              <p className="text-zinc-400 text-sm">{ad.adminMessage}</p>
+            <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+              <h2 className="font-semibold text-gray-700 mb-2 text-sm">Dernier message admin</h2>
+              <p className="text-gray-500 text-sm">{ad.adminMessage}</p>
             </div>
           )}
 
@@ -96,41 +96,41 @@ export default async function AdminAdReviewPage({ params }: { params: Promise<{ 
               { label: "Candidatures",   value: String(ad._count.bookings),       icon: Users },
               { label: "Vues",           value: String(ad.viewCount ?? 0),        icon: Eye },
             ].map((s) => (
-              <div key={s.label} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
-                <p className="text-lg font-bold text-white">{s.value}</p>
-                <p className="text-zinc-500 text-xs mt-0.5">{s.label}</p>
+              <div key={s.label} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+                <p className="text-lg font-bold text-gray-900">{s.value}</p>
+                <p className="text-gray-500 text-xs mt-0.5">{s.label}</p>
               </div>
             ))}
           </div>
 
           {/* Options flags */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex flex-wrap gap-4">
+          <div className="bg-white border border-gray-200 rounded-2xl p-5 flex flex-wrap gap-4 shadow-sm">
             <div className="text-sm">
-              <span className="text-zinc-500">Image confidentielle : </span>
-              <span className={ad.isConfidential ? "text-yellow-400" : "text-zinc-300"}>{ad.isConfidential ? "Oui" : "Non"}</span>
+              <span className="text-gray-500">Image confidentielle : </span>
+              <span className={ad.isConfidential ? "text-amber-600 font-medium" : "text-gray-700"}>{ad.isConfidential ? "Oui" : "Non"}</span>
             </div>
             <div className="text-sm">
-              <span className="text-zinc-500">Auto-accept : </span>
-              <span className={ad.autoAccept ? "text-green-400" : "text-zinc-300"}>{ad.autoAccept ? "Oui" : "Non"}</span>
+              <span className="text-gray-500">Auto-accept : </span>
+              <span className={ad.autoAccept ? "text-green-600 font-medium" : "text-gray-700"}>{ad.autoAccept ? "Oui" : "Non"}</span>
             </div>
             {ad.maxApplicants && (
               <div className="text-sm">
-                <span className="text-zinc-500">Max candidatures : </span>
-                <span className="text-zinc-300">{ad.maxApplicants}</span>
+                <span className="text-gray-500">Max candidatures : </span>
+                <span className="text-gray-700">{ad.maxApplicants}</span>
               </div>
             )}
           </div>
 
           {/* Eligible models */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-            <h2 className="font-semibold text-white mb-4">Véhicules éligibles ({ad.eligibleModels.length})</h2>
+          <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+            <h2 className="font-semibold text-gray-900 mb-4">Véhicules éligibles ({ad.eligibleModels.length})</h2>
             <div className="space-y-3">
               {(Object.entries(groupedModels) as [string, string[]][]).map(([brand, models]) => (
                 <div key={brand}>
-                  <p className="text-zinc-500 text-xs font-semibold uppercase tracking-wider mb-1.5">{brand}</p>
+                  <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-1.5">{brand}</p>
                   <div className="flex flex-wrap gap-1.5">
                     {models.map((m) => (
-                      <span key={m} className="bg-zinc-800 text-zinc-300 text-xs px-2 py-0.5 rounded-md">{m}</span>
+                      <span key={m} className="bg-gray-100 text-gray-700 text-xs px-2 py-0.5 rounded-md">{m}</span>
                     ))}
                   </div>
                 </div>

@@ -16,33 +16,33 @@ export default async function AdminUsersPage() {
   });
 
   const ROLE_COLORS: Record<string, string> = {
-    CUSTOMER:    "text-blue-400 bg-blue-400/10",
-    ADVERTISER:  "text-purple-400 bg-purple-400/10",
-    SUPER_ADMIN: "text-yellow-400 bg-yellow-400/10",
+    CUSTOMER:    "text-blue-600 bg-blue-50",
+    ADVERTISER:  "text-purple-600 bg-purple-50",
+    SUPER_ADMIN: "text-amber-600 bg-amber-50",
   };
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-bold text-white mb-6">Utilisateurs ({users.length})</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">Utilisateurs ({users.length})</h1>
 
-      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
-        <div className="divide-y divide-zinc-800">
+      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+        <div className="divide-y divide-gray-100">
           {users.map((user) => (
             <div key={user.id} className="flex items-center gap-4 p-5">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className="text-white font-medium text-sm">{user.name}</p>
+                  <p className="text-gray-900 font-medium text-sm">{user.name}</p>
                   {user.companyName && (
-                    <span className="text-zinc-500 text-xs">({user.companyName})</span>
+                    <span className="text-gray-500 text-xs">({user.companyName})</span>
                   )}
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${ROLE_COLORS[user.role] ?? "text-zinc-400 bg-zinc-700"}`}>
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${ROLE_COLORS[user.role] ?? "text-gray-500 bg-gray-100"}`}>
                     {user.role}
                   </span>
                 </div>
-                <p className="text-zinc-500 text-xs mt-0.5">
+                <p className="text-gray-500 text-xs mt-0.5">
                   {user.email} · Inscrit le {new Date(user.createdAt).toLocaleDateString("fr-FR")}
                 </p>
-                <p className="text-zinc-600 text-xs mt-0.5">
+                <p className="text-gray-400 text-xs mt-0.5">
                   {user._count.ads} annonce{user._count.ads !== 1 ? "s" : ""} · {user._count.bookings} candidature{user._count.bookings !== 1 ? "s" : ""}
                 </p>
               </div>

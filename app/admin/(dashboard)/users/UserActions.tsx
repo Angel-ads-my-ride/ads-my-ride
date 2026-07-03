@@ -34,14 +34,14 @@ export default function UserActions({ userId, currentRole }: { userId: string; c
         value={role}
         onChange={(e) => changeRole(e.target.value)}
         disabled={rolePending}
-        className="bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs rounded-lg px-2 py-1.5 focus:outline-none focus:border-zinc-500 disabled:opacity-50 cursor-pointer"
+        className="bg-white border border-gray-300 text-gray-700 text-xs rounded-lg px-2 py-1.5 focus:outline-none focus:border-zinc-500 disabled:opacity-50 cursor-pointer"
       >
         {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
       </select>
       <button
         onClick={del}
         disabled={delPending}
-        className="text-xs text-red-400 hover:text-red-300 bg-red-400/10 hover:bg-red-400/20 px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+        className="text-xs text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-2.5 py-1.5 rounded-lg transition-colors disabled:opacity-50"
       >
         {delPending ? "…" : "Supprimer"}
       </button>

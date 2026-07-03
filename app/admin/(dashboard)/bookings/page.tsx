@@ -1,10 +1,10 @@
 import { db } from "@/lib/db";
 
 const STATUS_COLORS: Record<string, string> = {
-  PENDING:   "text-yellow-400 bg-yellow-400/10",
-  CONFIRMED: "text-green-400 bg-green-400/10",
-  COMPLETED: "text-blue-400 bg-blue-400/10",
-  CANCELLED: "text-red-400 bg-red-400/10",
+  PENDING:   "text-amber-600 bg-amber-50",
+  CONFIRMED: "text-green-600 bg-green-50",
+  COMPLETED: "text-blue-600 bg-blue-50",
+  CANCELLED: "text-red-600 bg-red-50",
 };
 const STATUS_LABELS: Record<string, string> = {
   PENDING:   "En attente",
@@ -27,36 +27,36 @@ export default async function AdminBookingsPage() {
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-bold text-white mb-2">Candidatures ({bookings.length})</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-2">Candidatures ({bookings.length})</h1>
       <div className="flex gap-4 mb-6">
         {Object.entries(counts).map(([status, count]) => (
-          <span key={status} className={`text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_COLORS[status] ?? "text-zinc-400 bg-zinc-700"}`}>
+          <span key={status} className={`text-xs font-medium px-2.5 py-1 rounded-full ${STATUS_COLORS[status] ?? "text-gray-500 bg-gray-100"}`}>
             {STATUS_LABELS[status] ?? status} ({count})
           </span>
         ))}
       </div>
 
-      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
+      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
         {bookings.length === 0 ? (
-          <p className="text-zinc-500 text-sm text-center py-12">Aucune candidature</p>
+          <p className="text-gray-400 text-sm text-center py-12">Aucune candidature</p>
         ) : (
-          <div className="divide-y divide-zinc-800">
+          <div className="divide-y divide-gray-100">
             {bookings.map((b) => (
               <div key={b.id} className="flex items-center gap-4 p-5">
                 <div className="flex-1 min-w-0">
-                  <p className="text-white font-medium text-sm">
+                  <p className="text-gray-900 font-medium text-sm">
                     {b.user.name}
-                    <span className="text-zinc-500 font-normal"> → </span>
+                    <span className="text-gray-400 font-normal"> → </span>
                     {b.ad.title}
                   </p>
-                  <p className="text-zinc-500 text-xs mt-0.5">
+                  <p className="text-gray-500 text-xs mt-0.5">
                     {b.user.email} · {b.user.carBrand} {b.user.carModel}
                   </p>
-                  <p className="text-zinc-600 text-xs mt-0.5">
+                  <p className="text-gray-400 text-xs mt-0.5">
                     Annonceur : {b.ad.advertiser.companyName ?? b.ad.advertiser.name} · {new Date(b.createdAt).toLocaleDateString("fr-FR")}
                   </p>
                 </div>
-                <span className={`text-xs font-medium px-2.5 py-1 rounded-full flex-shrink-0 ${STATUS_COLORS[b.status] ?? "text-zinc-400 bg-zinc-700"}`}>
+                <span className={`text-xs font-medium px-2.5 py-1 rounded-full flex-shrink-0 ${STATUS_COLORS[b.status] ?? "text-gray-500 bg-gray-100"}`}>
                   {STATUS_LABELS[b.status] ?? b.status}
                 </span>
               </div>

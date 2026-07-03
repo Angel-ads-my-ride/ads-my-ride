@@ -19,51 +19,51 @@ export default async function AdminDashboardPage() {
   });
 
   const stats = [
-    { label: "Utilisateurs",       value: totalUsers,   icon: Users,         color: "text-blue-400",   bg: "bg-blue-400/10" },
-    { label: "Annonces",           value: totalAds,     icon: FileText,      color: "text-zinc-400",   bg: "bg-zinc-600/10" },
-    { label: "En attente review",  value: pendingAds,   icon: Clock,         color: "text-yellow-400", bg: "bg-yellow-400/10" },
-    { label: "Candidatures",       value: totalBookings,icon: ClipboardList, color: "text-green-400",  bg: "bg-green-400/10" },
-    { label: "Vues totales",       value: totalViews,   icon: Eye,           color: "text-purple-400", bg: "bg-purple-400/10" },
+    { label: "Utilisateurs",       value: totalUsers,   icon: Users,         color: "text-blue-600",   bg: "bg-blue-50" },
+    { label: "Annonces",           value: totalAds,     icon: FileText,      color: "text-zinc-800",   bg: "bg-zinc-50" },
+    { label: "En attente review",  value: pendingAds,   icon: Clock,         color: "text-amber-600",  bg: "bg-amber-50" },
+    { label: "Candidatures",       value: totalBookings,icon: ClipboardList, color: "text-green-600",  bg: "bg-green-50" },
+    { label: "Vues totales",       value: totalViews,   icon: Eye,           color: "text-purple-600", bg: "bg-purple-50" },
   ];
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-bold text-white mb-8">Dashboard</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-8">Dashboard</h1>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-10">
         {stats.map((s) => (
-          <div key={s.label} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+          <div key={s.label} className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
             <div className={`w-9 h-9 rounded-xl ${s.bg} flex items-center justify-center mb-3`}>
               <s.icon className={`w-4 h-4 ${s.color}`} />
             </div>
-            <p className="text-2xl font-bold text-white">{s.value.toLocaleString("fr-FR")}</p>
-            <p className="text-zinc-500 text-xs mt-0.5">{s.label}</p>
+            <p className="text-2xl font-bold text-gray-900">{s.value.toLocaleString("fr-FR")}</p>
+            <p className="text-gray-500 text-xs mt-0.5">{s.label}</p>
           </div>
         ))}
       </div>
 
-      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-        <h2 className="font-semibold text-white mb-4 flex items-center gap-2">
-          <Clock className="w-4 h-4 text-yellow-400" />
+      <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+        <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <Clock className="w-4 h-4 text-amber-600" />
           Annonces en attente de validation ({pendingAds})
         </h2>
         {recentAds.length === 0 ? (
-          <p className="text-zinc-500 text-sm py-4 text-center">Aucune annonce en attente</p>
+          <p className="text-gray-400 text-sm py-4 text-center">Aucune annonce en attente</p>
         ) : (
           <div className="space-y-3">
             {recentAds.map((ad) => (
               <a
                 key={ad.id}
                 href={`/admin/ads/${ad.id}`}
-                className="flex items-center justify-between p-4 bg-zinc-800/50 rounded-xl border border-zinc-700/50 hover:border-zinc-600 transition-colors"
+                className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-gray-300 transition-colors"
               >
                 <div>
-                  <p className="text-white font-medium text-sm">{ad.title}</p>
-                  <p className="text-zinc-500 text-xs mt-0.5">
+                  <p className="text-gray-900 font-medium text-sm">{ad.title}</p>
+                  <p className="text-gray-500 text-xs mt-0.5">
                     {ad.advertiser.companyName ?? ad.advertiser.name} · {new Date(ad.createdAt).toLocaleDateString("fr-FR")}
                   </p>
                 </div>
-                <span className="text-xs text-yellow-400 bg-yellow-400/10 px-2.5 py-1 rounded-full font-medium">
+                <span className="text-xs text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full font-medium">
                   Review →
                 </span>
               </a>
