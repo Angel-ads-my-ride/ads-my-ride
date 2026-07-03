@@ -1,6 +1,11 @@
+"use client";
+
 import Link from "next/link";
+import { useLocale } from "@/lib/i18n/LocaleContext";
 
 export default function Footer() {
+  const { t } = useLocale();
+
   return (
     <footer className="bg-white border-t border-gray-100 py-10 px-4">
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -8,10 +13,10 @@ export default function Footer() {
           <img src="/Logo.png" alt="Ads My Ride" className="w-8 h-8 object-contain" />
         </Link>
         <p className="text-gray-400 text-xs">
-          © {new Date().getFullYear()} Ads My Ride. Tous droits réservés.
+          © {new Date().getFullYear()} Ads My Ride. {t.footer.rights}
         </p>
         <Link href="/mentions-legales" className="text-gray-500 hover:text-gray-800 text-sm transition-colors">
-          Mentions légales
+          {t.footer.legalMentions}
         </Link>
       </div>
     </footer>

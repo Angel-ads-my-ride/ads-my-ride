@@ -1,5 +1,8 @@
+"use client";
+
 import { Euro, Car } from "lucide-react";
 import Link from "next/link";
+import { useLocale } from "@/lib/i18n/LocaleContext";
 
 type Ad = {
   id: string;
@@ -12,6 +15,7 @@ type Ad = {
 };
 
 export default function AdCard({ ad, userBrand, userModel }: { ad: Ad; userBrand?: string; userModel?: string }) {
+  const { t } = useLocale();
   const isCompatible =
     userBrand && userModel
       ? ad.eligibleModels.some(
@@ -34,19 +38,19 @@ export default function AdCard({ ad, userBrand, userModel }: { ad: Ad; userBrand
           <div className="w-full h-full flex items-center justify-center">
             <div className="text-center">
               <Car className="w-10 h-10 text-gray-300 mx-auto mb-1" />
-              <p className="text-gray-400 text-xs">Photo à venir</p>
+              <p className="text-gray-400 text-xs">{t.adCard.photoComing}</p>
             </div>
           </div>
         )}
         <div className="absolute top-3 left-3">
           <span className="bg-zinc-700 text-zinc-900 text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm">
-            {ad.pricePerDay.toFixed(2)}€/jour
+            {ad.pricePerDay.toFixed(2)}€{t.adCard.perDay}
           </span>
         </div>
         {!isCompatible && userBrand && (
           <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
             <span className="text-gray-500 text-xs font-medium bg-white/90 px-3 py-1 rounded-full border border-gray-200">
-              Non compatible
+              {t.adCard.notCompatible}
             </span>
           </div>
         )}
@@ -62,11 +66,11 @@ export default function AdCard({ ad, userBrand, userModel }: { ad: Ad; userBrand
         <div className="flex items-center gap-3 text-xs text-gray-400 mb-4">
           <span className="flex items-center gap-1">
             <Euro className="w-3 h-3" />
-            ≈ {(ad.pricePerDay * 30).toFixed(0)}€/mois
+            ≈ {(ad.pricePerDay * 30).toFixed(0)}€{t.adCard.perMonth}
           </span>
           <span className="flex items-center gap-1">
             <Car className="w-3 h-3" />
-            {ad.eligibleModels.length} modèle{ad.eligibleModels.length > 1 ? "s" : ""}
+            {ad.eligibleModels.length} {ad.eligibleModels.length > 1 ? t.adCard.modelPlural : t.adCard.modelSingular}
           </span>
         </div>
 
@@ -78,7 +82,7 @@ export default function AdCard({ ad, userBrand, userModel }: { ad: Ad; userBrand
               : "bg-gray-100 text-gray-400 cursor-not-allowed pointer-events-none"
           }`}
         >
-          {isCompatible ? "Voir l'annonce" : "Non disponible"}
+          {isCompatible ? t.adCard.viewAd : t.adCard.notAvailable}
         </Link>
       </div>
     </div>

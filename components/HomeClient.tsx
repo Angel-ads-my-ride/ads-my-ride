@@ -5,6 +5,7 @@ import { ChevronDown, Car, ArrowDown, Shield, TrendingUp } from "lucide-react";
 import { CAR_DATA, getModelsForBrand } from "@/lib/car-data";
 import AdCard from "./AdCard";
 import Link from "next/link";
+import { useLocale } from "@/lib/i18n/LocaleContext";
 
 type Ad = {
   id: string;
@@ -24,6 +25,7 @@ type Props = {
 };
 
 export default function HomeClient({ ads, initialBrand, initialModel, isLoggedIn }: Props) {
+  const { t } = useLocale();
   const [selectedBrand, setSelectedBrand] = useState<string>(initialBrand ?? "");
   const [selectedModel, setSelectedModel] = useState<string>(initialModel ?? "");
   const adsRef = useRef<HTMLDivElement>(null);
@@ -81,7 +83,7 @@ export default function HomeClient({ ads, initialBrand, initialModel, isLoggedIn
 
           {/* Subtitle */}
           <p className="text-gray-400 text-sm mb-8 max-w-sm mx-auto leading-relaxed">
-            Choisissez une annonce, posez un covering chez un partenaire, et gagnez de l&apos;argent en conduisant normalement.
+            {t.hero.subtitle}
           </p>
 
           {/* Car Selector Card — prominent */}
@@ -91,21 +93,21 @@ export default function HomeClient({ ads, initialBrand, initialModel, isLoggedIn
                 <Car className="w-4 h-4 text-white" />
               </div>
               <div className="text-left">
-                <h2 className="font-bold text-gray-900 text-base leading-tight">Sélectionnez votre véhicule</h2>
-                <p className="text-gray-400 text-xs">Pour voir les annonces compatibles</p>
+                <h2 className="font-bold text-gray-900 text-base leading-tight">{t.hero.selectVehicle}</h2>
+                <p className="text-gray-400 text-xs">{t.hero.selectVehicleSub}</p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs text-gray-500 font-semibold mb-1.5 uppercase tracking-wider">Marque</label>
+                <label className="block text-xs text-gray-500 font-semibold mb-1.5 uppercase tracking-wider">{t.hero.brand}</label>
                 <div className="relative group">
                   <select
                     value={selectedBrand}
                     onChange={(e) => handleBrandChange(e.target.value)}
                     className="w-full bg-white border-2 border-gray-200 text-gray-900 rounded-xl px-4 py-3 pr-10 appearance-none focus:outline-none focus:border-zinc-500 focus:ring-4 focus:ring-zinc-100 transition-all cursor-pointer font-medium shadow-sm hover:border-gray-300"
                   >
-                    <option value="">Choisir une marque</option>
+                    <option value="">{t.hero.chooseBrand}</option>
                     {CAR_DATA.map((d) => <option key={d.brand} value={d.brand}>{d.brand}</option>)}
                   </select>
                   <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center w-6 h-6 bg-gray-100 rounded-lg group-focus-within:bg-zinc-100 transition-colors">
@@ -115,7 +117,7 @@ export default function HomeClient({ ads, initialBrand, initialModel, isLoggedIn
               </div>
 
               <div>
-                <label className="block text-xs text-gray-500 font-semibold mb-1.5 uppercase tracking-wider">Modèle</label>
+                <label className="block text-xs text-gray-500 font-semibold mb-1.5 uppercase tracking-wider">{t.hero.model}</label>
                 <div className="relative group">
                   <select
                     value={selectedModel}
@@ -123,7 +125,7 @@ export default function HomeClient({ ads, initialBrand, initialModel, isLoggedIn
                     disabled={!selectedBrand}
                     className="w-full bg-white border-2 border-gray-200 text-gray-900 rounded-xl px-4 py-3 pr-10 appearance-none focus:outline-none focus:border-zinc-500 focus:ring-4 focus:ring-zinc-100 transition-all cursor-pointer font-medium shadow-sm hover:border-gray-300 disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed disabled:hover:border-gray-200"
                   >
-                    <option value="">{selectedBrand ? "Choisir un modèle" : "Marque d'abord…"}</option>
+                    <option value="">{selectedBrand ? t.hero.chooseModel : t.hero.brandFirst}</option>
                     {models.map((m) => <option key={m} value={m}>{m}</option>)}
                   </select>
                   <div className={`absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center w-6 h-6 rounded-lg transition-colors ${selectedBrand ? "bg-gray-100 group-focus-within:bg-zinc-100" : "bg-gray-50"}`}>
@@ -137,26 +139,26 @@ export default function HomeClient({ ads, initialBrand, initialModel, isLoggedIn
               <div className="mt-4 flex items-center justify-between bg-zinc-50 rounded-xl px-4 py-3 border border-zinc-100">
                 <p className="text-gray-600 text-sm">
                   <span className="text-gray-900 font-bold">{filteredAds.length}</span>{" "}
-                  annonce{filteredAds.length !== 1 ? "s" : ""} pour{" "}
+                  {filteredAds.length !== 1 ? t.hero.adsCountPlural : t.hero.adsCountSingular} {t.hero.adsCountFor}{" "}
                   <span className="text-zinc-700 font-semibold">{selectedBrand} {selectedModel}</span>
                 </p>
                 <button
                   onClick={() => adsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
                   className="flex items-center gap-1 text-zinc-700 hover:text-zinc-800 text-sm font-bold transition-colors"
                 >
-                  Voir <ArrowDown className="w-4 h-4" />
+                  {t.hero.see} <ArrowDown className="w-4 h-4" />
                 </button>
               </div>
             ) : (
-              <p className="mt-4 text-gray-400 text-xs text-center">Sélectionnez votre marque puis votre modèle</p>
+              <p className="mt-4 text-gray-400 text-xs text-center">{t.hero.selectBrandThenModel}</p>
             )}
           </div>
 
           {!isLoggedIn && (
             <p className="mt-4 text-gray-400 text-sm">
-              Pas encore inscrit ?{" "}
+              {t.hero.notRegistered}{" "}
               <Link href="/register" className="text-zinc-700 hover:text-zinc-800 font-semibold">
-                Créer un compte
+                {t.hero.createAccount}
               </Link>
             </p>
           )}
@@ -170,34 +172,24 @@ export default function HomeClient({ ads, initialBrand, initialModel, isLoggedIn
       {/* ── HOW IT WORKS ── */}
       <section id="comment-ca-marche" className="py-20 px-4 bg-gray-50 border-t border-gray-100 scroll-mt-16">
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-3">Comment ça marche ?</h2>
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-3">{t.howItWorks.title}</h2>
           <p className="text-gray-500 text-center mb-12 max-w-xl mx-auto">
-            3 étapes simples pour monétiser votre véhicule.
+            {t.howItWorks.subtitle}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-10">
-            {[
-              {
-                step: "01", icon: Car, title: "Choisissez une annonce",
-                desc: "Sélectionnez votre véhicule et parcourez les campagnes disponibles. Chaque annonceur définit les modèles éligibles.",
-              },
-              {
-                step: "02", icon: Shield, title: "Posez le covering",
-                desc: "Prenez rendez-vous chez l'un de nos partenaires. L'installation du covering est prise en charge par l'annonceur.",
-              },
-              {
-                step: "03", icon: TrendingUp, title: "Touchez vos gains",
-                desc: "Conduisez normalement et recevez votre rémunération quotidienne directement sur votre compte.",
-              },
-            ].map((item) => (
-              <div key={item.step} className="relative">
-                <div className="text-6xl font-black text-gray-100 mb-3 leading-none">{item.step}</div>
-                <div className="w-10 h-10 bg-zinc-50 rounded-xl flex items-center justify-center mb-4 border border-zinc-100">
-                  <item.icon className="w-5 h-5 text-zinc-700" />
+            {[Car, Shield, TrendingUp].map((Icon, i) => {
+              const step = t.howItWorks.steps[i];
+              return (
+                <div key={step.title} className="relative">
+                  <div className="text-6xl font-black text-gray-100 mb-3 leading-none">{String(i + 1).padStart(2, "0")}</div>
+                  <div className="w-10 h-10 bg-zinc-50 rounded-xl flex items-center justify-center mb-4 border border-zinc-100">
+                    <Icon className="w-5 h-5 text-zinc-700" />
+                  </div>
+                  <h3 className="font-bold text-lg text-gray-900 mb-2">{step.title}</h3>
+                  <p className="text-gray-500 text-sm leading-relaxed">{step.desc}</p>
                 </div>
-                <h3 className="font-bold text-lg text-gray-900 mb-2">{item.title}</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -209,13 +201,13 @@ export default function HomeClient({ ads, initialBrand, initialModel, isLoggedIn
             <div>
               <h2 className="text-3xl font-bold text-gray-900 mb-2">
                 {selectedBrand && selectedModel
-                  ? `Annonces pour ${selectedBrand} ${selectedModel}`
-                  : "Toutes les annonces"}
+                  ? `${t.ads.adsFor} ${selectedBrand} ${selectedModel}`
+                  : t.ads.allAds}
               </h2>
               <p className="text-gray-500">
                 {selectedBrand && selectedModel
-                  ? `${filteredAds.length} campagne${filteredAds.length !== 1 ? "s" : ""} compatible${filteredAds.length !== 1 ? "s" : ""}`
-                  : "Sélectionnez votre véhicule ci-dessus pour filtrer"}
+                  ? `${filteredAds.length} ${filteredAds.length !== 1 ? t.ads.campaignPlural : t.ads.campaignSingular} ${filteredAds.length !== 1 ? t.ads.compatiblePlural : t.ads.compatibleSingular}`
+                  : t.ads.selectVehicleToFilter}
               </p>
             </div>
             {(!selectedBrand || !selectedModel) && (
@@ -223,7 +215,7 @@ export default function HomeClient({ ads, initialBrand, initialModel, isLoggedIn
                 onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
                 className="text-sm text-zinc-700 hover:text-zinc-800 font-semibold border border-zinc-300 hover:border-orange-300 px-4 py-2 rounded-xl transition-all self-start bg-zinc-50"
               >
-                ↑ Sélectionner mon véhicule
+                {t.ads.selectMyVehicle}
               </button>
             )}
           </div>
@@ -231,16 +223,16 @@ export default function HomeClient({ ads, initialBrand, initialModel, isLoggedIn
           {ads.length === 0 ? (
             <div className="text-center py-20">
               <Car className="w-16 h-16 text-gray-200 mx-auto mb-4" />
-              <p className="text-gray-400 text-lg">Aucune annonce disponible pour le moment</p>
-              <p className="text-gray-300 text-sm mt-2">Revenez bientôt, de nouvelles campagnes arrivent régulièrement.</p>
+              <p className="text-gray-400 text-lg">{t.ads.noAdsAvailable}</p>
+              <p className="text-gray-300 text-sm mt-2">{t.ads.comeBackSoon}</p>
             </div>
           ) : filteredAds.length === 0 && selectedBrand && selectedModel ? (
             <div className="text-center py-20">
               <Car className="w-16 h-16 text-gray-200 mx-auto mb-4" />
               <p className="text-gray-400 text-lg">
-                Pas d&apos;annonce compatible avec votre {selectedBrand} {selectedModel}
+                {t.ads.noCompatiblePrefix} {selectedBrand} {selectedModel}
               </p>
-              <p className="text-gray-300 text-sm mt-2">De nouvelles campagnes pour votre modèle arrivent bientôt.</p>
+              <p className="text-gray-300 text-sm mt-2">{t.ads.noCompatibleSoon}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

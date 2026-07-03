@@ -1,7 +1,5 @@
 import { getSession } from "@/lib/session";
-import Navbar from "@/components/Navbar";
-import HomeClient from "@/components/HomeClient";
-import Footer from "@/components/Footer";
+import HomeShell from "@/components/HomeShell";
 import { db } from "@/lib/db";
 
 export default async function HomePage() {
@@ -30,15 +28,12 @@ export default async function HomePage() {
   }
 
   return (
-    <>
-      <Navbar role={session?.role} />
-      <HomeClient
-        ads={JSON.parse(JSON.stringify(ads))}
-        initialBrand={userCarBrand}
-        initialModel={userCarModel}
-        isLoggedIn={!!session}
-      />
-      <Footer />
-    </>
+    <HomeShell
+      role={session?.role}
+      ads={JSON.parse(JSON.stringify(ads))}
+      initialBrand={userCarBrand}
+      initialModel={userCarModel}
+      isLoggedIn={!!session}
+    />
   );
 }
