@@ -1,6 +1,7 @@
 import { getSession } from "@/lib/session";
 import Navbar from "@/components/Navbar";
 import HomeClient from "@/components/HomeClient";
+import Footer from "@/components/Footer";
 import { db } from "@/lib/db";
 
 export default async function HomePage() {
@@ -37,6 +38,7 @@ export default async function HomePage() {
         initialModel={userCarModel}
         isLoggedIn={!!session}
       />
+      <Footer />
     </>
   );
 }

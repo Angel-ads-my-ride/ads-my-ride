@@ -168,7 +168,7 @@ export default function HomeClient({ ads, initialBrand, initialModel, isLoggedIn
       </section>
 
       {/* ── HOW IT WORKS ── */}
-      <section className="py-20 px-4 bg-gray-50 border-t border-gray-100">
+      <section id="comment-ca-marche" className="py-20 px-4 bg-gray-50 border-t border-gray-100 scroll-mt-16">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl font-bold text-center text-gray-900 mb-3">Comment ça marche ?</h2>
           <p className="text-gray-500 text-center mb-12 max-w-xl mx-auto">
@@ -203,7 +203,7 @@ export default function HomeClient({ ads, initialBrand, initialModel, isLoggedIn
       </section>
 
       {/* ── ADS SECTION ── */}
-      <section ref={adsRef} className="py-20 px-4 bg-white border-t border-gray-100 min-h-screen" id="annonces">
+      <section ref={adsRef} className="py-20 px-4 bg-white border-t border-gray-100 min-h-screen scroll-mt-16" id="annonces">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
             <div>

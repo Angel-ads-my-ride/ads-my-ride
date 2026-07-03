@@ -20,14 +20,20 @@ export default function Navbar({ role }: { role?: string | null }) {
           : "bg-white/80 backdrop-blur-sm"
       }`}
     >
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
+      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+        <Link href="/" className="flex items-center gap-2 flex-shrink-0">
           <img src="/Logo.png" alt="Ads My Ride" className="w-10 h-10 object-contain" />
           <span className="font-bold text-lg tracking-tight text-gray-900">
           </span>
         </Link>
 
-        <div className="flex items-center gap-3">
+        <div className="hidden sm:flex items-center gap-8 text-sm font-medium text-gray-600">
+          <Link href="/" className="hover:text-gray-900 transition-colors">Accueil</Link>
+          <Link href="/#comment-ca-marche" className="hover:text-gray-900 transition-colors">Découvrir</Link>
+          <Link href="/#annonces" className="hover:text-gray-900 transition-colors">Annonces</Link>
+        </div>
+
+        <div className="flex items-center gap-3 flex-shrink-0">
           {role === "CUSTOMER" && (
             <>
               <Link href="/dashboard" className="text-sm text-gray-700 hover:text-gray-900 border border-gray-300 hover:border-gray-400 px-4 py-2 rounded-lg transition-colors font-medium">
