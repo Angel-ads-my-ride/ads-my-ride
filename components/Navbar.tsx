@@ -30,7 +30,7 @@ export default function Navbar({ role }: { role?: string | null }) {
         <div className="flex items-center gap-3">
           {role === "CUSTOMER" && (
             <>
-              <Link href="/dashboard" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+              <Link href="/dashboard" className="text-sm text-gray-700 hover:text-gray-900 border border-gray-300 hover:border-gray-400 px-4 py-2 rounded-lg transition-colors font-medium">
                 Mon dashboard
               </Link>
               <form action="/api/auth/logout" method="POST">
@@ -42,7 +42,7 @@ export default function Navbar({ role }: { role?: string | null }) {
           )}
           {role === "ADVERTISER" && (
             <>
-              <Link href="/advertiser/dashboard" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+              <Link href="/advertiser/dashboard" className="text-sm text-gray-700 hover:text-gray-900 border border-gray-300 hover:border-gray-400 px-4 py-2 rounded-lg transition-colors font-medium">
                 Dashboard annonceur
               </Link>
               <form action="/api/auth/logout" method="POST">
@@ -54,7 +54,7 @@ export default function Navbar({ role }: { role?: string | null }) {
           )}
           {!role && (
             <>
-              <Link href="/auth/login" className="text-sm text-gray-600 hover:text-gray-900 transition-colors font-medium">
+              <Link href="/auth/login" className="text-sm text-gray-700 hover:text-gray-900 border border-gray-300 hover:border-gray-400 px-4 py-2 rounded-lg transition-colors font-medium">
                 Connexion
               </Link>
               <Link
