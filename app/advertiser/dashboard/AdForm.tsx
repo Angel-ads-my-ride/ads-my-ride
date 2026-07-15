@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useMemo, useState } from "react";
-import { Plus, Trash2, ChevronDown, Info, EyeOff, Users, Zap, Globe, Car as CarIcon, CalendarRange, Calculator, Gauge } from "lucide-react";
+import { Plus, Trash2, ChevronDown, Info, EyeOff, Users, Zap, Globe, Car as CarIcon, CalendarRange, Calculator } from "lucide-react";
 import { saveAd } from "@/app/actions/ads";
 import { CAR_DATA, getModelsForBrand } from "@/lib/car-data";
 import {
@@ -56,6 +56,7 @@ export default function AdForm({
   const [eligibleModels, setEligibleModels] = useState<EligibleModel[]>(ad?.eligibleModels ?? []);
   const [addBrand, setAddBrand] = useState("");
   const [addModel, setAddModel] = useState("");
+  const [showAllVehicles, setShowAllVehicles] = useState(false);
   const [isConfidential, setIsConfidential] = useState(ad?.isConfidential ?? false);
   const [autoAccept, setAutoAccept] = useState(ad?.autoAccept ?? false);
   const [imagePreview, setImagePreview] = useState<string | null>(ad?.imageUrl ?? null);
@@ -66,6 +67,8 @@ export default function AdForm({
   const [startDate, setStartDate] = useState(toDateInputValue(ad?.startDate));
   const [endDate, setEndDate] = useState(toDateInputValue(ad?.endDate));
   const [totalBudget, setTotalBudget] = useState(ad?.totalBudget ? String(ad.totalBudget) : "");
+  const [vehicleCount, setVehicleCount] = useState("");
+  const [budgetSource, setBudgetSource] = useState<"budget" | "vehicles">("budget");
 
   useEffect(() => {
     if (state?.success) onSaved(!!state.isDraft);
@@ -128,24 +131,48 @@ export default function AdForm({
   const estimate = useMemo(() => {
     if (campaignDays === null) return null;
 
-    const budget = parseFloat(totalBudget);
     const days = campaignDays;
-    const costPerDriver = ESTIMATOR_DAILY_RATE_PER_DRIVER * days + ESTIMATOR_FLAT_COST_PER_DRIVER;
-    const suggestedDrivers = budget > 0 ? Math.floor(budget / costPerDriver) : null;
+    const costPerVehicle = ESTIMATOR_DAILY_RATE_PER_DRIVER * days + ESTIMATOR_FLAT_COST_PER_DRIVER;
 
     const fuelPrice = FUEL_PRICE_PER_LITER[estimatorCountry] ?? FUEL_PRICE_PER_LITER.France;
     const fuelCostPerKm = (AVERAGE_CONSUMPTION_L_PER_100KM / 100) * fuelPrice;
     const minKmPerDay = ESTIMATOR_DAILY_RATE_PER_DRIVER / (4 * fuelCostPerKm);
     const maxKmPerDay = ESTIMATOR_DAILY_RATE_PER_DRIVER / (2 * fuelCostPerKm);
 
-    return { days, costPerDriver, suggestedDrivers, fuelPrice, fuelCostPerKm, minKmPerDay, maxKmPerDay };
-  }, [totalBudget, campaignDays, estimatorCountry]);
+    return { days, costPerVehicle, fuelPrice, fuelCostPerKm, minKmPerDay, maxKmPerDay };
+  }, [campaignDays, estimatorCountry]);
+
+  // Budget total and vehicle count are two views of the same number — editing
+  // either one recomputes the other from the per-vehicle cost.
+  useEffect(() => {
+    if (!estimate) return;
+    if (budgetSource === "budget") {
+      const budget = parseFloat(totalBudget);
+      setVehicleCount(budget > 0 ? String(Math.floor(budget / estimate.costPerVehicle)) : "");
+    } else {
+      const count = parseInt(vehicleCount, 10);
+      if (count > 0) {
+        setTotalBudget(String(Math.round(count * estimate.costPerVehicle * 100) / 100));
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [totalBudget, vehicleCount, estimate?.costPerVehicle, budgetSource]);
 
   function formatBudgetDisplay(raw: string) {
     if (!raw) return "";
     const [intPart, decPart] = raw.split(".");
     const withSpaces = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
     return decPart !== undefined ? `${withSpaces}.${decPart}` : withSpaces;
+  }
+
+  function handleBudgetChange(raw: string) {
+    setBudgetSource("budget");
+    setTotalBudget(raw.replace(/[^\d.]/g, ""));
+  }
+
+  function handleVehicleCountChange(raw: string) {
+    setBudgetSource("vehicles");
+    setVehicleCount(raw.replace(/[^\d]/g, ""));
   }
 
   const inputCls = "w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-xl px-4 py-3 focus:outline-none focus:border-zinc-700 focus:ring-2 focus:ring-zinc-700/15 transition-all placeholder:text-gray-400";
@@ -264,70 +291,88 @@ export default function AdForm({
           </button>
         </div>
 
-        <p className="text-gray-400 text-xs">
-          {modelSelectionMode === "ALL_EXCEPT"
-            ? "Toutes les marques et tous les modèles sont acceptés par défaut. Ajoutez ci-dessous uniquement les modèles que vous voulez exclure (optionnel)."
-            : "Aucun modèle n'est accepté par défaut. Ajoutez ci-dessous, un par un, les seuls modèles que vous acceptez."}
-        </p>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="relative">
-            <select value={addBrand} onChange={(e) => { setAddBrand(e.target.value); setAddModel(""); }} className={selectCls}>
-              <option value="">-- Marque --</option>
-              {CAR_DATA.map((d) => <option key={d.brand} value={d.brand}>{d.brand}</option>)}
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-          </div>
-          <div className="relative">
-            <select value={addModel} onChange={(e) => setAddModel(e.target.value)} disabled={!addBrand}
-              className={`${selectCls} disabled:opacity-40 disabled:cursor-not-allowed`}>
-              <option value="">-- Modèle --</option>
-              {addModelsForBrand.map((m) => <option key={m} value={m}>{m}</option>)}
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-          </div>
-          <div className="flex gap-2">
-            <button type="button" onClick={addEligibleModel} disabled={!addBrand || !addModel}
-              className="flex-1 flex items-center justify-center gap-1.5 bg-zinc-700 hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed text-zinc-900 text-sm font-semibold py-3 rounded-xl transition-colors shadow-sm">
-              <Plus className="w-4 h-4" /> Ajouter
+        {modelSelectionMode === "ALL_EXCEPT" ? (
+          <div>
+            <p className="text-gray-400 text-xs mb-2">Toutes les marques et tous les modèles sont acceptés.</p>
+            <button type="button" onClick={() => setShowAllVehicles((v) => !v)}
+              className="text-sm text-zinc-600 hover:text-zinc-800 font-medium underline underline-offset-2">
+              {showAllVehicles ? "Masquer" : "Voir"} la liste complète des véhicules pris en charge
             </button>
-            <button type="button" onClick={addAllModels}
-              title={addBrand ? "Ajouter tous les modèles de cette marque" : "Ajouter tous les véhicules, toutes marques confondues"}
-              className="px-3 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-xl transition-colors border border-gray-200">
-              Tous
-            </button>
-          </div>
-        </div>
-
-        {eligibleModels.length === 0 ? (
-          <div className="text-center py-8 border border-dashed border-gray-300 rounded-xl bg-gray-50">
-            <p className="text-gray-400 text-sm">
-              {modelSelectionMode === "ALL_EXCEPT" ? "Aucune exclusion — tous les modèles sont acceptés" : "Aucun modèle sélectionné"}
-            </p>
+            {showAllVehicles && (
+              <div className="mt-3 max-h-64 overflow-y-auto space-y-3 border border-gray-100 rounded-xl p-4 bg-gray-50">
+                {CAR_DATA.map((d) => (
+                  <div key={d.brand}>
+                    <p className="text-gray-700 font-semibold text-sm mb-1">{d.brand}</p>
+                    <p className="text-gray-500 text-xs">{d.models.join(", ")}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         ) : (
-          <div className="space-y-3">
-            {(Object.entries(groupedModels) as [string, string[]][]).map(([brand, models]) => (
-              <div key={brand} className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                <p className="text-gray-700 font-semibold text-sm mb-2">{brand}</p>
-                <div className="flex flex-wrap gap-2">
-                  {models.map((model) => (
-                    <span key={model} className="inline-flex items-center gap-1.5 bg-white border border-gray-200 text-gray-700 text-xs px-2.5 py-1 rounded-lg shadow-sm">
-                      {model}
-                      <button type="button"
-                        onClick={() => { const idx = eligibleModels.findIndex((m) => m.brand === brand && m.model === model); if (idx !== -1) removeModel(idx); }}
-                        className="text-gray-400 hover:text-red-500 transition-colors">
-                        <Trash2 className="w-3 h-3" />
-                      </button>
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
+          <>
             <p className="text-gray-400 text-xs">
-              {eligibleModels.length} modèle{eligibleModels.length !== 1 ? "s" : ""} {modelSelectionMode === "ALL_EXCEPT" ? "exclu" : "sélectionné"}{eligibleModels.length !== 1 ? "s" : ""}
+              Aucun modèle n&apos;est accepté par défaut. Ajoutez ci-dessous, un par un, les seuls modèles que vous acceptez.
             </p>
-          </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="relative">
+                <select value={addBrand} onChange={(e) => { setAddBrand(e.target.value); setAddModel(""); }} className={selectCls}>
+                  <option value="">-- Marque --</option>
+                  {CAR_DATA.map((d) => <option key={d.brand} value={d.brand}>{d.brand}</option>)}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              </div>
+              <div className="relative">
+                <select value={addModel} onChange={(e) => setAddModel(e.target.value)} disabled={!addBrand}
+                  className={`${selectCls} disabled:opacity-40 disabled:cursor-not-allowed`}>
+                  <option value="">-- Modèle --</option>
+                  {addModelsForBrand.map((m) => <option key={m} value={m}>{m}</option>)}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              </div>
+              <div className="flex gap-2">
+                <button type="button" onClick={addEligibleModel} disabled={!addBrand || !addModel}
+                  className="flex-1 flex items-center justify-center gap-1.5 bg-zinc-700 hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed text-zinc-900 text-sm font-semibold py-3 rounded-xl transition-colors shadow-sm">
+                  <Plus className="w-4 h-4" /> Ajouter
+                </button>
+                <button type="button" onClick={addAllModels}
+                  title={addBrand ? "Ajouter tous les modèles de cette marque" : "Ajouter tous les véhicules, toutes marques confondues"}
+                  className="px-3 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-xl transition-colors border border-gray-200">
+                  Tous
+                </button>
+              </div>
+            </div>
+
+            {eligibleModels.length === 0 ? (
+              <div className="text-center py-8 border border-dashed border-gray-300 rounded-xl bg-gray-50">
+                <p className="text-gray-400 text-sm">Aucun modèle sélectionné</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {(Object.entries(groupedModels) as [string, string[]][]).map(([brand, models]) => (
+                  <div key={brand} className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                    <p className="text-gray-700 font-semibold text-sm mb-2">{brand}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {models.map((model) => (
+                        <span key={model} className="inline-flex items-center gap-1.5 bg-white border border-gray-200 text-gray-700 text-xs px-2.5 py-1 rounded-lg shadow-sm">
+                          {model}
+                          <button type="button"
+                            onClick={() => { const idx = eligibleModels.findIndex((m) => m.brand === brand && m.model === model); if (idx !== -1) removeModel(idx); }}
+                            className="text-gray-400 hover:text-red-500 transition-colors">
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+                <p className="text-gray-400 text-xs">
+                  {eligibleModels.length} modèle{eligibleModels.length !== 1 ? "s" : ""} sélectionné{eligibleModels.length !== 1 ? "s" : ""}
+                </p>
+              </div>
+            )}
+          </>
         )}
 
         {/* Vehicle condition sub-section */}
@@ -352,24 +397,25 @@ export default function AdForm({
 
         <div>
           <h2 className="font-semibold text-gray-900 flex items-center gap-1.5"><Calculator className="w-4 h-4 text-gray-400" /> Estimation du budget</h2>
-          <p className="text-gray-400 text-xs mt-1">Renseignez d&apos;abord les dates de la campagne ci-dessus, puis votre budget total, pour estimer combien de conducteurs vous pouvez financer.</p>
+          <p className="text-gray-400 text-xs mt-1">Renseignez d&apos;abord les dates de la campagne ci-dessus, puis le budget ou le nombre de véhicules — l&apos;autre se calcule automatiquement.</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
-          <div>
+        <div className="flex flex-col sm:flex-row sm:items-end gap-3">
+          <div className="flex-1">
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Budget total *</label>
             <div className="relative">
               <input type="text" inputMode="decimal" required value={formatBudgetDisplay(totalBudget)}
-                onChange={(e) => setTotalBudget(e.target.value.replace(/[^\d.]/g, ""))} placeholder="5 000"
+                onChange={(e) => handleBudgetChange(e.target.value)} placeholder="5 000"
                 className={`${inputCls} pr-10`} />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">€</span>
             </div>
           </div>
-          <div className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3">
-            <p className="text-gray-400 text-xs">≈ Nombre de conducteurs</p>
-            <p className="text-2xl font-bold text-gray-900">
-              {estimate && estimate.suggestedDrivers !== null ? estimate.suggestedDrivers : "—"}
-            </p>
+          <div className="flex items-center justify-center text-xl font-bold text-gray-300 sm:pb-3">=</div>
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Nombre de véhicules</label>
+            <input type="text" inputMode="numeric" value={vehicleCount}
+              onChange={(e) => handleVehicleCountChange(e.target.value)} placeholder="—"
+              className={inputCls} />
           </div>
         </div>
 
@@ -379,30 +425,16 @@ export default function AdForm({
             <span>Renseignez des dates de campagne valides (1 semaine minimum) ci-dessus pour voir l&apos;estimation.</span>
           </div>
         ) : (
-          <>
-            <div className="flex items-start gap-2 text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded-xl p-3">
-              <Info className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-gray-400" />
-              <span>
-                Estimation basée sur un coût moyen par conducteur de {ESTIMATOR_DAILY_RATE_PER_DRIVER.toFixed(2)}€/jour + {ESTIMATOR_FLAT_COST_PER_DRIVER}€ fixe,
-                sur {estimate.days} jour{estimate.days !== 1 ? "s" : ""} (durée de votre campagne), soit {estimate.costPerDriver.toFixed(2)}€ par conducteur.
-                La campagne se met en pause automatiquement quand le budget total est atteint.
-              </span>
-            </div>
-
-            <div className="border-t border-gray-100 pt-4">
-              <p className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-1.5"><Gauge className="w-4 h-4 text-gray-400" /> Kilométrage conseillé par jour et par conducteur</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">
-                {Math.round(estimate.minKmPerDay)} – {Math.round(estimate.maxKmPerDay)} km/jour
-              </p>
-              <p className="text-gray-400 text-xs mt-2 leading-relaxed">
-                Calcul : pour rester juste envers le conducteur, sa rémunération journalière ({ESTIMATOR_DAILY_RATE_PER_DRIVER.toFixed(2)}€) doit couvrir entre 2 et 4 fois
-                son coût en carburant. On prend le prix actuel de l&apos;essence en {estimatorCountry} (≈ {estimate.fuelPrice.toFixed(2)}€/L) et une consommation moyenne
-                de {AVERAGE_CONSUMPTION_L_PER_100KM}L/100km, soit {(estimate.fuelCostPerKm * 100).toFixed(2)}€ de carburant tous les 100km. Le kilométrage maximum
-                recommandé ({Math.round(estimate.maxKmPerDay)} km/jour) correspond au seuil des 2x (le plus généreux) ; le minimum ({Math.round(estimate.minKmPerDay)} km/jour)
-                correspond au seuil des 4x.
-              </p>
-            </div>
-          </>
+          <div className="flex items-start gap-2 text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded-xl p-3">
+            <Info className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-gray-400" />
+            <span>
+              Estimation basée sur un coût moyen par véhicule de {ESTIMATOR_DAILY_RATE_PER_DRIVER.toFixed(2)}€/jour + {ESTIMATOR_FLAT_COST_PER_DRIVER}€ fixe,
+              sur {estimate.days} jour{estimate.days !== 1 ? "s" : ""} (durée de votre campagne), soit {estimate.costPerVehicle.toFixed(2)}€ par véhicule.
+              La campagne se met en pause automatiquement quand le budget total est atteint. Kilométrage conseillé par jour et par véhicule : environ {Math.round(estimate.minKmPerDay)}
+              –{Math.round(estimate.maxKmPerDay)} km (la rémunération journalière doit couvrir entre 2 et 4 fois le coût en carburant, sur la base du prix de l&apos;essence
+              en {estimatorCountry} ≈ {estimate.fuelPrice.toFixed(2)}€/L et d&apos;une consommation moyenne de {AVERAGE_CONSUMPTION_L_PER_100KM}L/100km).
+            </span>
+          </div>
         )}
       </div>
 
