@@ -93,11 +93,15 @@ export default function AdForm({
     setAddModel("");
   }
 
-  function addAllModelsForBrand() {
-    if (!addBrand) return;
-    const newModels = getModelsForBrand(addBrand)
-      .filter((m) => !eligibleModels.some((e) => e.brand === addBrand && e.model === m))
-      .map((m) => ({ brand: addBrand, model: m }));
+  function addAllModels() {
+    const source = addBrand
+      ? [{ brand: addBrand, models: getModelsForBrand(addBrand) }]
+      : CAR_DATA;
+    const newModels = source.flatMap((d) =>
+      d.models
+        .filter((m) => !eligibleModels.some((e) => e.brand === d.brand && e.model === m))
+        .map((m) => ({ brand: d.brand, model: m }))
+    );
     setEligibleModels([...eligibleModels, ...newModels]);
   }
 
@@ -122,8 +126,10 @@ export default function AdForm({
   const estimatorCountry = (countries[0] as keyof typeof FUEL_PRICE_PER_LITER) ?? "France";
 
   const estimate = useMemo(() => {
+    if (campaignDays === null) return null;
+
     const budget = parseFloat(totalBudget);
-    const days = campaignDays ?? 7;
+    const days = campaignDays;
     const costPerDriver = ESTIMATOR_DAILY_RATE_PER_DRIVER * days + ESTIMATOR_FLAT_COST_PER_DRIVER;
     const suggestedDrivers = budget > 0 ? Math.floor(budget / costPerDriver) : null;
 
@@ -134,6 +140,13 @@ export default function AdForm({
 
     return { days, costPerDriver, suggestedDrivers, fuelPrice, fuelCostPerKm, minKmPerDay, maxKmPerDay };
   }, [totalBudget, campaignDays, estimatorCountry]);
+
+  function formatBudgetDisplay(raw: string) {
+    if (!raw) return "";
+    const [intPart, decPart] = raw.split(".");
+    const withSpaces = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    return decPart !== undefined ? `${withSpaces}.${decPart}` : withSpaces;
+  }
 
   const inputCls = "w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-xl px-4 py-3 focus:outline-none focus:border-zinc-700 focus:ring-2 focus:ring-zinc-700/15 transition-all placeholder:text-gray-400";
   const selectCls = `${inputCls} pr-10 appearance-none cursor-pointer`;
@@ -243,11 +256,11 @@ export default function AdForm({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 bg-gray-50 border border-gray-200 rounded-xl p-1.5">
           <button type="button" onClick={() => setModelSelectionMode("ALL_EXCEPT")}
             className={`py-2.5 px-3 rounded-lg text-sm font-medium transition-colors ${modelSelectionMode === "ALL_EXCEPT" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
-            Accepter tous les véhicules, sauf exceptions
+            Tous les véhicules
           </button>
           <button type="button" onClick={() => setModelSelectionMode("MANUAL")}
             className={`py-2.5 px-3 rounded-lg text-sm font-medium transition-colors ${modelSelectionMode === "MANUAL" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
-            Choisir les véhicules un par un
+            Choix manuel
           </button>
         </div>
 
@@ -278,8 +291,9 @@ export default function AdForm({
               className="flex-1 flex items-center justify-center gap-1.5 bg-zinc-700 hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed text-zinc-900 text-sm font-semibold py-3 rounded-xl transition-colors shadow-sm">
               <Plus className="w-4 h-4" /> Ajouter
             </button>
-            <button type="button" onClick={addAllModelsForBrand} disabled={!addBrand} title="Ajouter tous les modèles de cette marque"
-              className="px-3 bg-gray-100 hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed text-gray-700 text-sm rounded-xl transition-colors border border-gray-200">
+            <button type="button" onClick={addAllModels}
+              title={addBrand ? "Ajouter tous les modèles de cette marque" : "Ajouter tous les véhicules, toutes marques confondues"}
+              className="px-3 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-xl transition-colors border border-gray-200">
               Tous
             </button>
           </div>
@@ -333,17 +347,20 @@ export default function AdForm({
 
       {/* Budget estimator */}
       <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-5 shadow-sm">
+        <input type="hidden" name="totalBudget" value={totalBudget} />
+        <input type="hidden" name="pricePerDay" value={ESTIMATOR_DAILY_RATE_PER_DRIVER} />
+
         <div>
           <h2 className="font-semibold text-gray-900 flex items-center gap-1.5"><Calculator className="w-4 h-4 text-gray-400" /> Estimation du budget</h2>
-          <p className="text-gray-400 text-xs mt-1">Entrez votre budget total pour estimer combien de conducteurs vous pouvez financer.</p>
+          <p className="text-gray-400 text-xs mt-1">Renseignez d&apos;abord les dates de la campagne ci-dessus, puis votre budget total, pour estimer combien de conducteurs vous pouvez financer.</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Budget total *</label>
             <div className="relative">
-              <input name="totalBudget" type="number" required min="1" step="0.01" value={totalBudget}
-                onChange={(e) => setTotalBudget(e.target.value)} placeholder="5000.00"
+              <input type="text" inputMode="decimal" required value={formatBudgetDisplay(totalBudget)}
+                onChange={(e) => setTotalBudget(e.target.value.replace(/[^\d.]/g, ""))} placeholder="5 000"
                 className={`${inputCls} pr-10`} />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">€</span>
             </div>
@@ -351,46 +368,42 @@ export default function AdForm({
           <div className="bg-gray-50 border border-gray-200 rounded-xl px-4 py-3">
             <p className="text-gray-400 text-xs">≈ Nombre de conducteurs</p>
             <p className="text-2xl font-bold text-gray-900">
-              {estimate.suggestedDrivers !== null ? estimate.suggestedDrivers : "—"}
+              {estimate && estimate.suggestedDrivers !== null ? estimate.suggestedDrivers : "—"}
             </p>
           </div>
         </div>
 
-        <div className="flex items-start gap-2 text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded-xl p-3">
-          <Info className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-gray-400" />
-          <span>
-            Estimation basée sur un coût moyen par conducteur de {ESTIMATOR_DAILY_RATE_PER_DRIVER.toFixed(2)}€/jour + {ESTIMATOR_FLAT_COST_PER_DRIVER}€ fixe,
-            sur {estimate.days} jour{estimate.days !== 1 ? "s" : ""} {campaignDays === null ? "(durée minimale, renseignez les dates ci-dessus pour affiner)" : "(durée de votre campagne)"},
-            soit {estimate.costPerDriver.toFixed(2)}€ par conducteur. La campagne se met en pause automatiquement quand le budget total est atteint.
-          </span>
-        </div>
-
-        <div className="border-t border-gray-100 pt-4">
-          <p className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-1.5"><Gauge className="w-4 h-4 text-gray-400" /> Kilométrage conseillé par jour et par conducteur</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">
-            {Math.round(estimate.minKmPerDay)} – {Math.round(estimate.maxKmPerDay)} km/jour
-          </p>
-          <p className="text-gray-400 text-xs mt-2 leading-relaxed">
-            Calcul : pour rester juste envers le conducteur, sa rémunération journalière ({ESTIMATOR_DAILY_RATE_PER_DRIVER.toFixed(2)}€) doit couvrir entre 2 et 4 fois
-            son coût en carburant. On prend le prix actuel de l&apos;essence en {estimatorCountry} (≈ {estimate.fuelPrice.toFixed(2)}€/L) et une consommation moyenne
-            de {AVERAGE_CONSUMPTION_L_PER_100KM}L/100km, soit {(estimate.fuelCostPerKm * 100).toFixed(2)}€ de carburant tous les 100km. Le kilométrage maximum
-            recommandé ({Math.round(estimate.maxKmPerDay)} km/jour) correspond au seuil des 2x (le plus généreux) ; le minimum ({Math.round(estimate.minKmPerDay)} km/jour)
-            correspond au seuil des 4x.
-          </p>
-        </div>
-      </div>
-
-      {/* Budget */}
-      <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-5 shadow-sm">
-        <h2 className="font-semibold text-gray-900">Rémunération</h2>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">Rémunération / jour par conducteur *</label>
-          <div className="relative max-w-xs">
-            <input name="pricePerDay" type="number" required min="0.01" step="0.01" defaultValue={ad?.pricePerDay} placeholder="5.00"
-              className={`${inputCls} pr-10`} />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">€</span>
+        {estimate === null ? (
+          <div className="flex items-start gap-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-xl p-3">
+            <Info className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-amber-500" />
+            <span>Renseignez des dates de campagne valides (1 semaine minimum) ci-dessus pour voir l&apos;estimation.</span>
           </div>
-        </div>
+        ) : (
+          <>
+            <div className="flex items-start gap-2 text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded-xl p-3">
+              <Info className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-gray-400" />
+              <span>
+                Estimation basée sur un coût moyen par conducteur de {ESTIMATOR_DAILY_RATE_PER_DRIVER.toFixed(2)}€/jour + {ESTIMATOR_FLAT_COST_PER_DRIVER}€ fixe,
+                sur {estimate.days} jour{estimate.days !== 1 ? "s" : ""} (durée de votre campagne), soit {estimate.costPerDriver.toFixed(2)}€ par conducteur.
+                La campagne se met en pause automatiquement quand le budget total est atteint.
+              </span>
+            </div>
+
+            <div className="border-t border-gray-100 pt-4">
+              <p className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-1.5"><Gauge className="w-4 h-4 text-gray-400" /> Kilométrage conseillé par jour et par conducteur</p>
+              <p className="text-2xl font-bold text-gray-900 mt-1">
+                {Math.round(estimate.minKmPerDay)} – {Math.round(estimate.maxKmPerDay)} km/jour
+              </p>
+              <p className="text-gray-400 text-xs mt-2 leading-relaxed">
+                Calcul : pour rester juste envers le conducteur, sa rémunération journalière ({ESTIMATOR_DAILY_RATE_PER_DRIVER.toFixed(2)}€) doit couvrir entre 2 et 4 fois
+                son coût en carburant. On prend le prix actuel de l&apos;essence en {estimatorCountry} (≈ {estimate.fuelPrice.toFixed(2)}€/L) et une consommation moyenne
+                de {AVERAGE_CONSUMPTION_L_PER_100KM}L/100km, soit {(estimate.fuelCostPerKm * 100).toFixed(2)}€ de carburant tous les 100km. Le kilométrage maximum
+                recommandé ({Math.round(estimate.maxKmPerDay)} km/jour) correspond au seuil des 2x (le plus généreux) ; le minimum ({Math.round(estimate.minKmPerDay)} km/jour)
+                correspond au seuil des 4x.
+              </p>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Advanced options */}

@@ -3,6 +3,12 @@
 export const FRANCE_MAP_WIDTH = 760.0;
 export const FRANCE_MAP_HEIGHT = 734.0;
 
+// Bounding box (same coordinate space as above) used to render a zoomed-in
+// inset of Île-de-France, whose departments are too small to click on the
+// full map.
+export const FRANCE_MAP_IDF_VIEWBOX = "332.6 138.3 122.4 97.6";
+export const FRANCE_IDF_CODES = ["75", "77", "78", "91", "92", "93", "94", "95"];
+
 export type FranceDepartment = { code: string; name: string; d: string };
 
 export const FRANCE_DEPARTMENTS: FranceDepartment[] = [
