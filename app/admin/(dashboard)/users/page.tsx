@@ -11,6 +11,7 @@ export default async function AdminUsersPage() {
       role: true,
       createdAt: true,
       companyName: true,
+      isCertified: true,
       _count: { select: { ads: true, bookings: true } },
     },
   });
@@ -38,6 +39,11 @@ export default async function AdminUsersPage() {
                   <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${ROLE_COLORS[user.role] ?? "text-gray-500 bg-gray-100"}`}>
                     {user.role}
                   </span>
+                  {user.role === "ADVERTISER" && (
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${user.isCertified ? "text-green-700 bg-green-50" : "text-red-600 bg-red-50"}`}>
+                      {user.isCertified ? "Certifié" : "Non certifié"}
+                    </span>
+                  )}
                 </div>
                 <p className="text-gray-500 text-xs mt-0.5">
                   {user.email} · Inscrit le {new Date(user.createdAt).toLocaleDateString("fr-FR")}
@@ -46,7 +52,12 @@ export default async function AdminUsersPage() {
                   {user._count.ads} annonce{user._count.ads !== 1 ? "s" : ""} · {user._count.bookings} candidature{user._count.bookings !== 1 ? "s" : ""}
                 </p>
               </div>
-              <UserActions userId={user.id} currentRole={user.role} />
+              <UserActions
+                userId={user.id}
+                currentRole={user.role}
+                isCertified={user.isCertified}
+                showCertify={user.role === "ADVERTISER" && !user.isCertified}
+              />
             </div>
           ))}
         </div>

@@ -44,6 +44,53 @@ export async function sendWelcomeEmail(to: string, name: string) {
   });
 }
 
+export async function sendNewAdvertiserToAdmin(
+  advertiserName: string,
+  companyName: string | null,
+  advertiserEmail: string
+) {
+  const adminEmail = process.env.ADMIN_EMAIL;
+  if (!adminEmail) return;
+  await getResend().emails.send({
+    from: FROM,
+    to: adminEmail,
+    subject: `Nouveau compte annonceur à certifier : ${companyName ?? advertiserName}`,
+    html: `
+      <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#fff;">
+        ${emailHeader()}
+        <h1 style="font-size:20px;font-weight:700;color:#111;margin:0 0 8px;">Nouveau compte annonceur</h1>
+        <p style="color:#6b7280;font-size:15px;line-height:1.6;margin:0 0 24px;">
+          <strong>${companyName ?? advertiserName}</strong> (${advertiserName} · ${advertiserEmail}) vient de créer un compte annonceur. Il doit être certifié avant de pouvoir publier des annonces.
+        </p>
+        <a href="${BASE_URL}/admin/users" style="display:inline-block;background:#3f3f46;color:#fff;font-weight:700;font-size:15px;padding:12px 28px;border-radius:12px;text-decoration:none;">
+          Voir dans l'admin →
+        </a>
+      </div>
+    `,
+  });
+}
+
+export async function sendAdvertiserCertified(to: string, name: string) {
+  await getResend().emails.send({
+    from: FROM,
+    to,
+    subject: "Votre compte annonceur est certifié ✓",
+    html: `
+      <div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#fff;">
+        ${emailHeader(true)}
+        <h1 style="font-size:22px;font-weight:700;color:#111;margin:0 0 8px;">C'est confirmé, ${name} !</h1>
+        <p style="color:#6b7280;font-size:15px;line-height:1.6;margin:0 0 24px;">
+          Votre compte annonceur a été certifié par notre équipe. Vous pouvez désormais publier vos annonces sur la plateforme.
+        </p>
+        <a href="${BASE_URL}/advertiser/dashboard"
+          style="display:inline-block;background:#3f3f46;color:#fff;font-weight:700;font-size:15px;padding:12px 28px;border-radius:12px;text-decoration:none;">
+          Publier une annonce →
+        </a>
+      </div>
+    `,
+  });
+}
+
 export async function sendAdSubmittedToAdmin(
   adTitle: string,
   advertiserName: string,

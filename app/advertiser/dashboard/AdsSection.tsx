@@ -20,7 +20,7 @@ const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
   REJECTED:             { label: "Refusée",                 cls: "bg-red-50 text-red-600 border border-red-200" },
 };
 
-export default function AdsSection({ ads }: { ads: Ad[] }) {
+export default function AdsSection({ ads, isCertified }: { ads: Ad[]; isCertified: boolean }) {
   const [formMode, setFormMode] = useState<null | "new" | Ad>(null);
   const router = useRouter();
 
@@ -37,6 +37,7 @@ export default function AdsSection({ ads }: { ads: Ad[] }) {
         </h2>
         <AdForm
           ad={formMode === "new" ? undefined : formMode}
+          isCertified={isCertified}
           onSaved={close}
           onCancel={() => setFormMode(null)}
         />

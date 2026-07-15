@@ -3,10 +3,20 @@
 import { useState, useTransition } from "react";
 import { adminDeleteUser, adminToggleUserRole } from "@/app/actions/admin";
 import { useRouter } from "next/navigation";
+import CertifyButton from "./CertifyButton";
 
 const ROLES = ["CUSTOMER", "ADVERTISER", "SUPER_ADMIN"];
 
-export default function UserActions({ userId, currentRole }: { userId: string; currentRole: string }) {
+export default function UserActions({
+  userId,
+  currentRole,
+  showCertify = false,
+}: {
+  userId: string;
+  currentRole: string;
+  isCertified?: boolean;
+  showCertify?: boolean;
+}) {
   const [role, setRole] = useState(currentRole);
   const [rolePending, startRoleTransition] = useTransition();
   const [delPending, startDelTransition] = useTransition();
@@ -30,6 +40,7 @@ export default function UserActions({ userId, currentRole }: { userId: string; c
 
   return (
     <div className="flex items-center gap-2 flex-shrink-0">
+      {showCertify && <CertifyButton userId={userId} />}
       <select
         value={role}
         onChange={(e) => changeRole(e.target.value)}

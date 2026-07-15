@@ -16,6 +16,16 @@ export async function saveAd(_prev: AdState, formData: FormData): Promise<AdStat
   const intent = formData.get("intent") as string; // "publish" | "draft"
   const isDraft = intent !== "publish";
 
+  if (!isDraft) {
+    const advertiser = await db.user.findUnique({
+      where: { id: session.userId },
+      select: { isCertified: true },
+    });
+    if (!advertiser?.isCertified) {
+      return { error: "Votre compte doit être certifié avant de pouvoir publier une annonce. Vous pouvez l'enregistrer en brouillon en attendant." };
+    }
+  }
+
   const title = formData.get("title") as string;
   const description = formData.get("description") as string;
   const pricePerDay = parseFloat(formData.get("pricePerDay") as string);
@@ -26,14 +36,30 @@ export async function saveAd(_prev: AdState, formData: FormData): Promise<AdStat
   const autoAccept = formData.get("autoAccept") === "true";
   const eligibleModelsRaw = formData.get("eligibleModels") as string;
   const countriesRaw = formData.get("countries") as string;
+  const departmentsRaw = formData.get("departments") as string;
   const vehicleConditionsRaw = formData.get("vehicleConditions") as string;
   const modelSelectionMode = (formData.get("modelSelectionMode") as string) === "MANUAL" ? "MANUAL" : "ALL_EXCEPT";
+  const startDateRaw = formData.get("startDate") as string;
+  const endDateRaw = formData.get("endDate") as string;
 
   if (!title || !description || isNaN(pricePerDay) || isNaN(totalBudget)) {
     return { error: "Tous les champs obligatoires doivent être remplis." };
   }
   if (pricePerDay <= 0 || totalBudget <= 0) {
     return { error: "Les montants doivent être positifs." };
+  }
+
+  const startDate = startDateRaw ? new Date(startDateRaw) : null;
+  const endDate = endDateRaw ? new Date(endDateRaw) : null;
+
+  if (!isDraft) {
+    if (!startDate || !endDate || isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      return { error: "Les dates de campagne sont requises." };
+    }
+    const durationDays = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
+    if (durationDays < 7) {
+      return { error: "La campagne doit durer au moins 1 semaine." };
+    }
   }
 
   let eligibleModels: { brand: string; model: string }[] = [];
@@ -52,6 +78,13 @@ export async function saveAd(_prev: AdState, formData: FormData): Promise<AdStat
     countries = JSON.parse(countriesRaw || "[]");
   } catch {
     countries = [];
+  }
+
+  let departments: string[] = [];
+  try {
+    departments = JSON.parse(departmentsRaw || "[]");
+  } catch {
+    departments = [];
   }
 
   let vehicleConditions: string[] = [];
@@ -89,8 +122,11 @@ export async function saveAd(_prev: AdState, formData: FormData): Promise<AdStat
         autoAccept,
         status,
         countries,
+        departments,
         vehicleConditions,
         modelSelectionMode,
+        startDate,
+        endDate,
       },
     });
 
@@ -113,8 +149,11 @@ export async function saveAd(_prev: AdState, formData: FormData): Promise<AdStat
         autoAccept,
         status,
         countries,
+        departments,
         vehicleConditions,
         modelSelectionMode,
+        startDate,
+        endDate,
         isActive: false,
         advertiserId: session.userId,
       },

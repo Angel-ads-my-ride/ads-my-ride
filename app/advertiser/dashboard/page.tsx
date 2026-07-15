@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
 import { db } from "@/lib/db";
-import { Euro, Users, TrendingUp, BarChart3 } from "lucide-react";
+import { Euro, Users, TrendingUp, BarChart3, ShieldAlert } from "lucide-react";
 import AdsSection from "./AdsSection";
 
 export default async function AdvertiserDashboardPage() {
@@ -33,6 +33,18 @@ export default async function AdvertiserDashboardPage() {
           <p className="text-gray-500 mt-1 text-sm">Gérez vos campagnes publicitaires</p>
         </div>
 
+        {!user.isCertified && (
+          <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-8">
+            <ShieldAlert className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-amber-800 font-medium text-sm">Compte en attente de certification</p>
+              <p className="text-amber-700/80 text-xs mt-0.5">
+                Notre équipe examine votre compte. Vous pouvez préparer vos annonces en brouillon, elles pourront être publiées dès que votre compte sera certifié.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
           {[
@@ -51,7 +63,7 @@ export default async function AdvertiserDashboardPage() {
           ))}
         </div>
 
-        <AdsSection ads={JSON.parse(JSON.stringify(user.ads))} />
+        <AdsSection ads={JSON.parse(JSON.stringify(user.ads))} isCertified={user.isCertified} />
       </main>
     </>
   );

@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
 import { getSession, createSession } from "@/lib/session";
 import { db } from "@/lib/db";
-import { sendAdApproved, sendAdRejected, sendAdNeedsModification } from "@/lib/email";
+import { sendAdApproved, sendAdRejected, sendAdNeedsModification, sendAdvertiserCertified } from "@/lib/email";
 
 type AuthState = { error?: string } | undefined;
 
@@ -75,6 +75,20 @@ export async function adminToggleUserRole(userId: string, newRole: string) {
   revalidatePath("/admin/users");
 }
 
+export async function adminCertifyAdvertiser(userId: string) {
+  await requireAdmin();
+  const user = await db.user.update({
+    where: { id: userId },
+    data: { isCertified: true },
+    select: { email: true, name: true, role: true },
+  });
+  if (user.role === "ADVERTISER") {
+    sendAdvertiserCertified(user.email, user.name).catch(() => null);
+  }
+  revalidatePath("/admin/users");
+  revalidatePath("/admin");
+}
+
 export async function adminDeleteAd(adId: string) {
   await requireAdmin();
   await db.ad.delete({ where: { id: adId } });
@@ -83,10 +97,11 @@ export async function adminDeleteAd(adId: string) {
 
 export async function getAdminStats() {
   await requireAdmin();
-  const [totalUsers, totalAds, pendingAds, totalBookings, totalViews] = await Promise.all([
+  const [totalUsers, totalAds, pendingAds, pendingCertifications, totalBookings, totalViews] = await Promise.all([
     db.user.count(),
     db.ad.count(),
     db.ad.count({ where: { status: "PENDING_REVIEW" } }),
+    db.user.count({ where: { role: "ADVERTISER", isCertified: false } }),
     db.booking.count(),
     db.ad.aggregate({ _sum: { viewCount: true } }),
   ]);
@@ -94,6 +109,7 @@ export async function getAdminStats() {
     totalUsers,
     totalAds,
     pendingAds,
+    pendingCertifications,
     totalBookings,
     totalViews: totalViews._sum.viewCount ?? 0,
   };

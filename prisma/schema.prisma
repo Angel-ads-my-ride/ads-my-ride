@@ -12,6 +12,7 @@ model User {
   name        String
   password    String
   role        String   @default("CUSTOMER")
+  isCertified Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -53,6 +54,7 @@ model Ad {
   updatedAt       DateTime @updatedAt
 
   countries           String[] @default([])
+  departments         String[] @default([])
   vehicleConditions   String[] @default([])
   modelSelectionMode  String   @default("ALL_EXCEPT")
 

@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { createSession, deleteSession, getSession } from "@/lib/session";
-import { sendWelcomeEmail } from "@/lib/email";
+import { sendWelcomeEmail, sendNewAdvertiserToAdmin } from "@/lib/email";
 import { fileToAvatarDataUri, ImageTooLargeError } from "@/lib/image";
 
 type AuthState = { error?: string; success?: boolean } | undefined;
@@ -113,6 +113,7 @@ export async function registerAdvertiser(
 
     await createSession(user.id, user.role);
     sendWelcomeEmail(email, name).catch(() => null);
+    sendNewAdvertiserToAdmin(name, companyName, email).catch(() => null);
   } catch {
     return { error: "Une erreur est survenue. Veuillez réessayer." };
   }
