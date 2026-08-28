@@ -10,12 +10,15 @@ import { sendAdApproved, sendAdRejected, sendAdNeedsModification, sendAdvertiser
 type AuthState = { error?: string } | undefined;
 
 export async function loginAdmin(_prev: AuthState, formData: FormData): Promise<AuthState> {
-  const email = formData.get("email") as string;
+  const email = ((formData.get("email") as string | null) ?? "").trim().toLowerCase();
   const password = formData.get("password") as string;
 
   if (!email || !password) return { error: "Email et mot de passe requis." };
 
-  const user = await db.user.findUnique({ where: { email } });
+  const user = await db.user.findUnique({
+    where: { email },
+    select: { id: true, password: true, role: true },
+  });
   if (!user || user.role !== "SUPER_ADMIN") return { error: "Identifiants incorrects." };
 
   const valid = await bcrypt.compare(password, user.password);

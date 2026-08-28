@@ -17,19 +17,25 @@ export default function FranceDepartmentMap({
   onChange: (codes: string[]) => void;
 }) {
   const [hovered, setHovered] = useState<string | null>(null);
+  const allDepartmentsTargeted = selected.length === 0 || selected.length === FRANCE_DEPARTMENTS.length;
 
   function toggle(code: string) {
+    if (selected.length === 0) {
+      onChange([code]);
+      return;
+    }
+
     onChange(selected.includes(code) ? selected.filter((c) => c !== code) : [...selected, code]);
   }
 
   function selectAll() {
-    onChange(FRANCE_DEPARTMENTS.map((d) => d.code));
+    onChange([]);
   }
 
   const hoveredName = hovered ? FRANCE_DEPARTMENTS.find((d) => d.code === hovered)?.name : null;
 
   function fillFor(code: string) {
-    if (selected.includes(code)) return "#3f3f46";
+    if (selected.length === 0 || selected.includes(code)) return "#3f3f46";
     if (hovered === code) return "#a1a1aa";
     return "#e4e4e7";
   }
@@ -56,17 +62,14 @@ export default function FranceDepartmentMap({
     <div>
       <div className="flex items-center justify-between mb-2">
         <p className="text-gray-400 text-xs">
-          {selected.length === 0
-            ? "Aucun département sélectionné — tous les départements sont ciblés."
+          {allDepartmentsTargeted
+            ? "Tous les départements sont ciblés."
             : `${selected.length} département${selected.length !== 1 ? "s" : ""} sélectionné${selected.length !== 1 ? "s" : ""}.`}
         </p>
         <div className="flex items-center gap-3 flex-shrink-0">
-          <button type="button" onClick={selectAll} className="text-xs text-zinc-600 hover:text-zinc-800 font-medium">
-            Tout sélectionner
-          </button>
-          {selected.length > 0 && (
-            <button type="button" onClick={() => onChange([])} className="text-xs text-zinc-600 hover:text-zinc-800 font-medium">
-              Réinitialiser
+          {!allDepartmentsTargeted && (
+            <button type="button" onClick={selectAll} className="text-xs text-zinc-600 hover:text-zinc-800 font-medium">
+              Tout cibler
             </button>
           )}
         </div>

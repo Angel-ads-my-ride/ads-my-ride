@@ -73,7 +73,7 @@ export default function ProfileForm({
       <button
         type="submit"
         disabled={pending}
-        className="bg-zinc-700 hover:bg-zinc-800 disabled:opacity-60 text-zinc-900 font-semibold px-5 py-2.5 rounded-xl transition-colors text-sm shadow-sm"
+        className="w-full sm:w-auto bg-zinc-700 hover:bg-zinc-800 disabled:opacity-60 text-zinc-900 font-semibold px-5 py-2.5 rounded-xl transition-all duration-150 text-sm shadow-sm cursor-pointer active:scale-[0.98] disabled:cursor-wait"
       >
         {pending ? "Enregistrement…" : "Enregistrer"}
       </button>

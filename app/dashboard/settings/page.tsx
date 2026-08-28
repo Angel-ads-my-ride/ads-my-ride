@@ -13,13 +13,13 @@ export default async function DashboardSettingsPage() {
   if (!user) redirect("/auth/login");
 
   return (
-    <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
+    <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-5 sm:space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Réglages</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Réglages</h1>
         <p className="text-gray-500 mt-1">Gérez vos informations et votre compte.</p>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+      <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 shadow-sm">
         <h2 className="font-semibold text-gray-900 mb-4">Informations du compte</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div>
@@ -33,7 +33,7 @@ export default async function DashboardSettingsPage() {
         </div>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+      <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 shadow-sm">
         <h2 className="font-semibold text-gray-900 mb-4">Profil &amp; véhicule</h2>
         <ProfileForm
           initialBrand={user.carBrand}

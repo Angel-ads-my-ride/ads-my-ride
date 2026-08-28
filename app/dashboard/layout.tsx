@@ -1,8 +1,10 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { getSession } from "@/lib/session";
-import { logout } from "@/app/actions/auth";
-import { LayoutDashboard, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, Settings } from "lucide-react";
+import DashboardMobileMenu from "@/components/DashboardMobileMenu";
+import LogoutSubmitButton from "@/components/LogoutSubmitButton";
 
 const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -14,12 +16,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (!session || session.role !== "CUSTOMER") redirect("/auth/login");
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="h-dvh overflow-hidden bg-gray-50 flex">
+      <DashboardMobileMenu variant="customer" />
+
       {/* Sidebar */}
-      <aside className="w-60 flex-shrink-0 bg-white border-r border-gray-200 flex flex-col">
+      <aside className="hidden md:flex w-60 h-dvh flex-shrink-0 bg-white border-r border-gray-200 flex-col">
         <div className="p-5 border-b border-gray-100">
           <Link href="/">
-            <img src="/Logo.png" alt="Ads My Ride" className="w-10 h-10 object-contain" />
+            <Image src="/Logo.png" alt="Ads My Ride" width={40} height={40} className="w-10 h-10 object-contain" />
           </Link>
         </div>
 
@@ -28,7 +32,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             <Link
               key={href}
               href={href}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors text-sm font-medium"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-all duration-150 text-sm font-medium cursor-pointer active:scale-[0.98]"
             >
               <Icon className="w-4 h-4" />
               {label}
@@ -37,22 +41,16 @@ export default async function DashboardLayout({ children }: { children: React.Re
         </nav>
 
         <div className="p-3 border-t border-gray-100">
-          <form action={logout}>
-            <button
-              type="submit"
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors text-sm"
-            >
-              <LogOut className="w-4 h-4" />
-              Déconnexion
-            </button>
+          <form action="/api/auth/logout" method="POST">
+            <LogoutSubmitButton />
           </form>
         </div>
       </aside>
 
       {/* Main */}
-      <div className="flex-1 overflow-auto">
+      <main className="min-w-0 flex-1 h-dvh overflow-auto pt-16 md:pt-0">
         {children}
-      </div>
+      </main>
     </div>
   );
 }

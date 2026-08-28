@@ -6,15 +6,32 @@ import { saveAd } from "@/app/actions/ads";
 import { CAR_DATA, getModelsForBrand } from "@/lib/car-data";
 import {
   COUNTRIES,
-  VEHICLE_CONDITIONS,
   FUEL_PRICE_PER_LITER,
   AVERAGE_CONSUMPTION_L_PER_100KM,
   ESTIMATOR_DAILY_RATE_PER_DRIVER,
   ESTIMATOR_FLAT_COST_PER_DRIVER,
 } from "@/lib/ad-options";
+import { FRANCE_DEPARTMENTS } from "@/lib/france-departments-map";
+import CarVisualPreview from "./CarVisualPreview";
 import FranceDepartmentMap from "./FranceDepartmentMap";
 
 type EligibleModel = { brand: string; model: string };
+
+const FRANCE_REGIONS = [
+  { name: "Auvergne-Rhône-Alpes", codes: ["01", "03", "07", "15", "26", "38", "42", "43", "63", "69", "73", "74"] },
+  { name: "Bourgogne-Franche-Comté", codes: ["21", "25", "39", "58", "70", "71", "89", "90"] },
+  { name: "Bretagne", codes: ["22", "29", "35", "56"] },
+  { name: "Centre-Val de Loire", codes: ["18", "28", "36", "37", "41", "45"] },
+  { name: "Corse", codes: ["2A", "2B"] },
+  { name: "Grand Est", codes: ["08", "10", "51", "52", "54", "55", "57", "67", "68", "88"] },
+  { name: "Hauts-de-France", codes: ["02", "59", "60", "62", "80"] },
+  { name: "Île-de-France", codes: ["75", "77", "78", "91", "92", "93", "94", "95"] },
+  { name: "Normandie", codes: ["14", "27", "50", "61", "76"] },
+  { name: "Nouvelle-Aquitaine", codes: ["16", "17", "19", "23", "24", "33", "40", "47", "64", "79", "86", "87"] },
+  { name: "Occitanie", codes: ["09", "11", "12", "30", "31", "32", "34", "46", "48", "65", "66", "81", "82"] },
+  { name: "Pays de la Loire", codes: ["44", "49", "53", "72", "85"] },
+  { name: "Provence-Alpes-Côte d'Azur", codes: ["04", "05", "06", "13", "83", "84"] },
+] as const;
 
 export type ExistingAd = {
   id: string;
@@ -62,7 +79,10 @@ export default function AdForm({
   const [imagePreview, setImagePreview] = useState<string | null>(ad?.imageUrl ?? null);
   const [countries, setCountries] = useState<string[]>(ad?.countries ?? []);
   const [departments, setDepartments] = useState<string[]>(ad?.departments ?? []);
-  const [vehicleConditions, setVehicleConditions] = useState<string[]>(ad?.vehicleConditions ?? []);
+  const [expandedCountry, setExpandedCountry] = useState<string | null>(
+    ad?.countries.includes("France") && ad.departments.length > 0 ? "France" : null
+  );
+  const [vehicleConditions] = useState<string[]>(ad?.vehicleConditions ?? []);
   const [modelSelectionMode, setModelSelectionMode] = useState(ad?.modelSelectionMode ?? "ALL_EXCEPT");
   const [startDate, setStartDate] = useState(toDateInputValue(ad?.startDate));
   const [endDate, setEndDate] = useState(toDateInputValue(ad?.endDate));
@@ -83,8 +103,36 @@ export default function AdForm({
     reader.readAsDataURL(file);
   }
 
-  function toggleInArray(list: string[], setList: (v: string[]) => void, value: string) {
-    setList(list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
+  function toggleCountry(country: string) {
+    const nextCountries = countries.includes(country)
+      ? countries.filter((c) => c !== country)
+      : [...countries, country];
+
+    setCountries(nextCountries);
+
+    if (!nextCountries.includes(country)) {
+      setExpandedCountry((current) => (current === country ? null : current));
+    }
+
+    if (country === "France" && !nextCountries.includes("France")) {
+      setDepartments([]);
+    }
+  }
+
+  function toggleFranceRegion(codes: readonly string[]) {
+    if (departments.length === 0) {
+      setDepartments([...codes]);
+      return;
+    }
+
+    const allRegionDepartmentsSelected = codes.every((code) => departments.includes(code));
+
+    if (allRegionDepartmentsSelected) {
+      setDepartments(departments.filter((code) => !codes.includes(code)));
+      return;
+    }
+
+    setDepartments([...departments, ...codes.filter((code) => !departments.includes(code))]);
   }
 
   const addModelsForBrand = getModelsForBrand(addBrand);
@@ -118,6 +166,11 @@ export default function AdForm({
     return acc;
   }, {});
 
+  const isAllFranceTargeted = departments.length === 0 || departments.length === FRANCE_DEPARTMENTS.length;
+  const franceCoverageLabel = isAllFranceTargeted
+    ? "Tous"
+    : `${departments.length} département${departments.length !== 1 ? "s" : ""}`;
+
   const campaignDays = useMemo(() => {
     if (!startDate || !endDate) return null;
     const start = new Date(startDate);
@@ -142,21 +195,20 @@ export default function AdForm({
     return { days, costPerVehicle, fuelPrice, fuelCostPerKm, minKmPerDay, maxKmPerDay };
   }, [campaignDays, estimatorCountry]);
 
-  // Budget total and vehicle count are two views of the same number — editing
-  // either one recomputes the other from the per-vehicle cost.
-  useEffect(() => {
-    if (!estimate) return;
-    if (budgetSource === "budget") {
-      const budget = parseFloat(totalBudget);
-      setVehicleCount(budget > 0 ? String(Math.floor(budget / estimate.costPerVehicle)) : "");
-    } else {
-      const count = parseInt(vehicleCount, 10);
-      if (count > 0) {
-        setTotalBudget(String(Math.round(count * estimate.costPerVehicle * 100) / 100));
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [totalBudget, vehicleCount, estimate?.costPerVehicle, budgetSource]);
+  const estimatedVehicleCount = useMemo(() => {
+    if (!estimate) return "";
+    const budget = parseFloat(totalBudget);
+    return budget > 0 ? String(Math.floor(budget / estimate.costPerVehicle)) : "";
+  }, [estimate, totalBudget]);
+
+  const estimatedTotalBudget = useMemo(() => {
+    if (!estimate) return "";
+    const count = parseInt(vehicleCount, 10);
+    return count > 0 ? String(Math.round(count * estimate.costPerVehicle * 100) / 100) : "";
+  }, [estimate, vehicleCount]);
+
+  const displayedTotalBudget = budgetSource === "vehicles" ? estimatedTotalBudget : totalBudget;
+  const displayedVehicleCount = budgetSource === "budget" ? estimatedVehicleCount : vehicleCount;
 
   function formatBudgetDisplay(raw: string) {
     if (!raw) return "";
@@ -194,8 +246,30 @@ export default function AdForm({
         <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl">{state.error}</div>
       )}
 
+      {/* Visual preview */}
+      <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 space-y-5 shadow-sm">
+        <div>
+          <h2 className="font-semibold text-gray-900">Visuel et aperçu</h2>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,0.8fr)_minmax(360px,1.2fr)] gap-4 sm:gap-5 lg:items-start">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Importer le visuel</label>
+            <input
+              name="imageFile"
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className={`${inputCls} file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-zinc-100 file:text-zinc-700 file:text-sm file:font-medium`}
+            />
+          </div>
+
+          <CarVisualPreview imageSrc={imagePreview} />
+        </div>
+      </div>
+
       {/* Basic info */}
-      <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-5 shadow-sm">
+      <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 space-y-5 shadow-sm">
         <div>
           <h2 className="font-semibold text-gray-900">Informations de la campagne</h2>
           <p className="text-gray-400 text-xs mt-1">Ces informations sont affichées telles quelles aux conducteurs sur la page publique de l&apos;annonce.</p>
@@ -211,20 +285,10 @@ export default function AdForm({
           <textarea name="description" required rows={4} defaultValue={ad?.description} placeholder="Décrivez votre campagne, le visuel, les conditions…"
             className={`${inputCls} resize-none`} />
         </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            Image / visuel <span className="text-gray-400 font-normal">(optionnel, 5 Mo max)</span>
-          </label>
-          <input name="imageFile" type="file" accept="image/*" onChange={handleImageChange} className={`${inputCls} file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-zinc-100 file:text-zinc-700 file:text-sm file:font-medium`} />
-          {imagePreview && (
-            <img src={imagePreview} alt="Aperçu" className="mt-3 w-full max-h-56 object-cover rounded-xl border border-gray-200" />
-          )}
-        </div>
       </div>
 
       {/* Campaign dates */}
-      <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-4 shadow-sm">
+      <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 space-y-4 shadow-sm">
         <div>
           <h2 className="font-semibold text-gray-900 flex items-center gap-1.5"><CalendarRange className="w-4 h-4 text-gray-400" /> Dates de la campagne</h2>
           <p className="text-gray-400 text-xs mt-1">Durée minimum : 1 semaine.</p>
@@ -250,7 +314,7 @@ export default function AdForm({
       </div>
 
       {/* Country */}
-      <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-4 shadow-sm">
+      <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 space-y-4 shadow-sm">
         <div>
           <h2 className="font-semibold text-gray-900 flex items-center gap-1.5"><Globe className="w-4 h-4 text-gray-400" /> Pays concernés</h2>
           <p className="text-gray-400 text-xs mt-1">Laissez vide pour cibler tous les pays.</p>
@@ -258,23 +322,108 @@ export default function AdForm({
         <div className="flex flex-wrap gap-2">
           {COUNTRIES.map((c) => (
             <label key={c} className={checkboxCls}>
-              <input type="checkbox" className="accent-zinc-700" checked={countries.includes(c)} onChange={() => toggleInArray(countries, setCountries, c)} />
+              <input type="checkbox" className="accent-zinc-700" checked={countries.includes(c)} onChange={() => toggleCountry(c)} />
               {c}
             </label>
           ))}
         </div>
 
-        {countries.includes("France") && (
-          <div className="border-t border-gray-100 pt-4">
-            <p className="text-sm font-medium text-gray-700 mb-1">Départements ciblés (France)</p>
-            <p className="text-gray-400 text-xs mb-3">Cliquez sur les départements à cibler. Aucune sélection = tous les départements.</p>
-            <FranceDepartmentMap selected={departments} onChange={setDepartments} />
+        {countries.length > 0 && (
+          <div className="border-t border-gray-100 pt-4 space-y-2">
+            {countries.map((country) => {
+              const hasDetail = country === "France";
+              const isExpanded = expandedCountry === country;
+              const coverageLabel = country === "France" ? franceCoverageLabel : "Tous";
+
+              return (
+                <div key={country} className="overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
+                  {hasDetail ? (
+                    <button
+                      type="button"
+                      onClick={() => setExpandedCountry(isExpanded ? null : country)}
+                      aria-expanded={isExpanded}
+                      className="w-full flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-left hover:bg-gray-100 transition-colors"
+                    >
+                      <span className="flex min-w-0 items-center gap-3">
+                        <span className="font-medium text-gray-900">{country}</span>
+                        <span className="rounded-full border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-600">
+                          {coverageLabel}
+                        </span>
+                      </span>
+                      <span className="flex items-center gap-1.5 text-xs font-medium text-zinc-600">
+                        Détail
+                        <ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+                      </span>
+                    </button>
+                  ) : (
+                    <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+                      <span className="font-medium text-gray-900">{country}</span>
+                      <span className="rounded-full border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-600">
+                        Tous
+                      </span>
+                    </div>
+                  )}
+
+                  {hasDetail && isExpanded && (
+                    <div className="border-t border-gray-200 bg-white p-4 space-y-4">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                          <p className="text-sm font-medium text-gray-700">Régions et départements</p>
+                          <p className="text-gray-400 text-xs mt-1">
+                            {isAllFranceTargeted
+                              ? "Toute la France est ciblée."
+                              : `${departments.length} département${departments.length !== 1 ? "s" : ""} ciblé${departments.length !== 1 ? "s" : ""}.`}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setDepartments([])}
+                          className={`px-3 py-2 rounded-lg border text-xs font-medium transition-colors ${
+                            isAllFranceTargeted
+                              ? "border-zinc-700 bg-zinc-50 text-zinc-800"
+                              : "border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100"
+                          }`}
+                        >
+                          Tous
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                        {FRANCE_REGIONS.map((region) => {
+                          const isRegionSelected = departments.length > 0 && region.codes.every((code) => departments.includes(code));
+
+                          return (
+                            <button
+                              key={region.name}
+                              type="button"
+                              onClick={() => toggleFranceRegion(region.codes)}
+                              className={`min-h-14 rounded-lg border px-3 py-2 text-left transition-colors ${
+                                isRegionSelected
+                                  ? "border-zinc-700 bg-zinc-50 text-zinc-800"
+                                  : "border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100"
+                              }`}
+                            >
+                              <span className="block text-sm font-medium leading-tight">{region.name}</span>
+                              <span className="block text-[11px] text-gray-400 mt-0.5">
+                                {region.codes.length} départements
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <FranceDepartmentMap selected={departments} onChange={setDepartments} />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
 
       {/* Eligible vehicles */}
-      <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-5 shadow-sm">
+      <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 space-y-5 shadow-sm">
         <div>
           <h2 className="font-semibold text-gray-900 flex items-center gap-1.5"><CarIcon className="w-4 h-4 text-gray-400" /> Véhicules éligibles</h2>
           <p className="text-gray-400 text-xs mt-1">Choisissez comment définir les véhicules acceptés.</p>
@@ -374,25 +523,11 @@ export default function AdForm({
             )}
           </>
         )}
-
-        {/* Vehicle condition sub-section */}
-        <div className="border-t border-gray-100 pt-4">
-          <p className="text-sm font-medium text-gray-700 mb-1">État du véhicule accepté</p>
-          <p className="text-gray-400 text-xs mb-3">Laissez vide pour accepter tous les états.</p>
-          <div className="flex flex-wrap gap-2">
-            {VEHICLE_CONDITIONS.map((c) => (
-              <label key={c.value} className={checkboxCls}>
-                <input type="checkbox" className="accent-zinc-700" checked={vehicleConditions.includes(c.value)} onChange={() => toggleInArray(vehicleConditions, setVehicleConditions, c.value)} />
-                {c.label}
-              </label>
-            ))}
-          </div>
-        </div>
       </div>
 
       {/* Budget estimator */}
-      <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-5 shadow-sm">
-        <input type="hidden" name="totalBudget" value={totalBudget} />
+      <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 space-y-5 shadow-sm">
+        <input type="hidden" name="totalBudget" value={displayedTotalBudget} />
         <input type="hidden" name="pricePerDay" value={ESTIMATOR_DAILY_RATE_PER_DRIVER} />
 
         <div>
@@ -404,7 +539,7 @@ export default function AdForm({
           <div className="flex-1">
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Budget total *</label>
             <div className="relative">
-              <input type="text" inputMode="decimal" required value={formatBudgetDisplay(totalBudget)}
+              <input type="text" inputMode="decimal" required value={formatBudgetDisplay(displayedTotalBudget)}
                 onChange={(e) => handleBudgetChange(e.target.value)} placeholder="5 000"
                 className={`${inputCls} pr-10`} />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium">€</span>
@@ -413,7 +548,7 @@ export default function AdForm({
           <div className="flex items-center justify-center text-xl font-bold text-gray-300 sm:pb-3">=</div>
           <div className="flex-1">
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Nombre de véhicules</label>
-            <input type="text" inputMode="numeric" value={vehicleCount}
+            <input type="text" inputMode="numeric" value={displayedVehicleCount}
               onChange={(e) => handleVehicleCountChange(e.target.value)} placeholder="—"
               className={inputCls} />
           </div>
@@ -439,7 +574,7 @@ export default function AdForm({
       </div>
 
       {/* Advanced options */}
-      <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-5 shadow-sm">
+      <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 space-y-5 shadow-sm">
         <h2 className="font-semibold text-gray-900">Options avancées</h2>
 
         <label className="flex items-start gap-3 cursor-pointer">
@@ -483,17 +618,17 @@ export default function AdForm({
         )}
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3">
         <button type="submit" name="intent" value="publish" disabled={pending || !isCertified}
           title={!isCertified ? "Votre compte doit être certifié avant de pouvoir publier une annonce." : undefined}
-          className="flex-1 sm:flex-none sm:px-8 bg-zinc-700 hover:bg-zinc-800 disabled:opacity-60 disabled:cursor-not-allowed text-zinc-900 font-semibold py-3 rounded-xl transition-colors shadow-sm">
+          className="w-full sm:w-auto sm:px-8 bg-zinc-700 hover:bg-zinc-800 disabled:opacity-60 disabled:cursor-not-allowed text-zinc-900 font-semibold py-3 rounded-xl transition-all duration-150 shadow-sm cursor-pointer active:scale-[0.98]">
           {pending ? "Enregistrement…" : "Publier l'annonce"}
         </button>
         <button type="submit" name="intent" value="draft" disabled={pending}
-          className="flex-1 sm:flex-none sm:px-6 bg-gray-100 hover:bg-gray-200 disabled:opacity-60 disabled:cursor-not-allowed text-gray-700 font-semibold py-3 rounded-xl transition-colors border border-gray-200">
+          className="w-full sm:w-auto sm:px-6 bg-gray-100 hover:bg-gray-200 disabled:opacity-60 disabled:cursor-not-allowed text-gray-700 font-semibold py-3 rounded-xl transition-all duration-150 border border-gray-200 cursor-pointer active:scale-[0.98]">
           {pending ? "Enregistrement…" : "Enregistrer comme brouillon"}
         </button>
-        <button type="button" onClick={onCancel} className="text-gray-500 hover:text-gray-700 text-sm transition-colors">Annuler</button>
+        <button type="button" onClick={onCancel} className="w-full sm:w-auto text-gray-500 hover:text-gray-700 text-sm transition-colors rounded-xl py-2 cursor-pointer">Annuler</button>
       </div>
     </form>
   );

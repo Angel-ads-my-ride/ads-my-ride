@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { ChevronDown, Car, ArrowDown, Shield, TrendingUp } from "lucide-react";
 import { CAR_DATA, getModelsForBrand } from "@/lib/car-data";
 import AdCard from "./AdCard";
@@ -39,6 +39,16 @@ export default function HomeClient({ ads, initialBrand, initialModel, isLoggedIn
   const adsRef = useRef<HTMLDivElement>(null);
 
   const models = selectedBrand ? getModelsForBrand(selectedBrand) : [];
+
+  useEffect(() => {
+    if (window.location.hash !== "#annonces") return;
+
+    const frame = window.requestAnimationFrame(() => {
+      adsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
 
   const filteredAds =
     selectedBrand && selectedModel

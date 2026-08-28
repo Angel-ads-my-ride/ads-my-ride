@@ -50,7 +50,8 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={pending}
-              className="w-full bg-zinc-700 hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-900 font-semibold py-3 rounded-xl transition-colors"
+              aria-busy={pending}
+              className="w-full bg-zinc-700 hover:bg-zinc-800 disabled:opacity-50 text-zinc-900 font-semibold py-3 rounded-xl transition-all duration-150 cursor-pointer active:scale-[0.99] disabled:cursor-wait"
             >
               {pending ? "Connexion…" : "Se connecter"}
             </button>

@@ -14,7 +14,7 @@ export default function DangerZone({ deleteAction }: { deleteAction: () => Promi
   }
 
   return (
-    <div className="bg-white border border-red-200 rounded-2xl p-6 shadow-sm">
+    <div className="bg-white border border-red-200 rounded-2xl p-4 sm:p-6 shadow-sm">
       <div className="flex items-center gap-2 mb-2">
         <AlertTriangle className="w-4 h-4 text-red-500" />
         <h2 className="font-semibold text-red-600">Zone de danger</h2>
@@ -26,7 +26,7 @@ export default function DangerZone({ deleteAction }: { deleteAction: () => Promi
         type="button"
         onClick={handleDelete}
         disabled={pending}
-        className="bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-semibold px-5 py-2.5 rounded-xl transition-colors text-sm disabled:opacity-50"
+        className="w-full sm:w-auto bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-semibold px-5 py-2.5 rounded-xl transition-all duration-150 text-sm disabled:opacity-50 cursor-pointer active:scale-[0.98]"
       >
         {pending ? "Suppression…" : "Supprimer mon compte"}
       </button>

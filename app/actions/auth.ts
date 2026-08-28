@@ -15,7 +15,7 @@ export async function registerCustomer(
   formData: FormData
 ): Promise<AuthState> {
   const name = formData.get("name") as string;
-  const email = formData.get("email") as string;
+  const email = ((formData.get("email") as string | null) ?? "").trim().toLowerCase();
   const password = formData.get("password") as string;
   const carBrand = formData.get("carBrand") as string;
   const carModel = formData.get("carModel") as string;
@@ -28,7 +28,7 @@ export async function registerCustomer(
   }
 
   try {
-    const existing = await db.user.findUnique({ where: { email } });
+    const existing = await db.user.findUnique({ where: { email }, select: { id: true } });
     if (existing) {
       return { error: "Un compte existe déjà avec cet email." };
     }
@@ -36,6 +36,7 @@ export async function registerCustomer(
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await db.user.create({
       data: { name, email, password: hashedPassword, role: "CUSTOMER", carBrand, carModel },
+      select: { id: true, role: true },
     });
 
     await createSession(user.id, user.role);
@@ -50,7 +51,7 @@ export async function loginUser(
   _prev: AuthState,
   formData: FormData
 ): Promise<AuthState> {
-  const email = formData.get("email") as string;
+  const email = ((formData.get("email") as string | null) ?? "").trim().toLowerCase();
   const password = formData.get("password") as string;
 
   if (!email || !password) {
@@ -59,7 +60,10 @@ export async function loginUser(
 
   let role: string;
   try {
-    const user = await db.user.findUnique({ where: { email } });
+    const user = await db.user.findUnique({
+      where: { email },
+      select: { id: true, password: true, role: true },
+    });
     if (
       !user ||
       (user.role !== "CUSTOMER" && user.role !== "ADVERTISER" && user.role !== "SUPER_ADMIN")
@@ -88,7 +92,7 @@ export async function registerAdvertiser(
   formData: FormData
 ): Promise<AuthState> {
   const name = formData.get("name") as string;
-  const email = formData.get("email") as string;
+  const email = ((formData.get("email") as string | null) ?? "").trim().toLowerCase();
   const password = formData.get("password") as string;
   const companyName = formData.get("companyName") as string;
   const siret = formData.get("siret") as string;
@@ -101,7 +105,7 @@ export async function registerAdvertiser(
   }
 
   try {
-    const existing = await db.user.findUnique({ where: { email } });
+    const existing = await db.user.findUnique({ where: { email }, select: { id: true } });
     if (existing) {
       return { error: "Un compte existe déjà avec cet email." };
     }
@@ -109,6 +113,7 @@ export async function registerAdvertiser(
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await db.user.create({
       data: { name, email, password: hashedPassword, role: "ADVERTISER", companyName, siret },
+      select: { id: true, role: true },
     });
 
     await createSession(user.id, user.role);

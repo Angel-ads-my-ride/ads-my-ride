@@ -30,6 +30,7 @@ export default function LoginPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
               <input
                 name="email" type="email" required placeholder="vous@exemple.com"
+                autoComplete="email"
                 className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-xl px-4 py-3 focus:outline-none focus:border-zinc-700 focus:ring-2 focus:ring-zinc-700/15 transition-all placeholder:text-gray-400"
               />
             </div>
@@ -43,13 +44,14 @@ export default function LoginPage() {
               </div>
               <input
                 name="password" type="password" required placeholder="••••••••"
+                autoComplete="current-password"
                 className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-xl px-4 py-3 focus:outline-none focus:border-zinc-700 focus:ring-2 focus:ring-zinc-700/15 transition-all placeholder:text-gray-400"
               />
             </div>
 
             <button
-              type="submit" disabled={pending}
-              className="w-full bg-zinc-700 hover:bg-zinc-800 disabled:opacity-60 text-zinc-900 font-semibold py-3 rounded-xl transition-colors shadow-sm"
+              type="submit" disabled={pending} aria-busy={pending}
+              className="w-full bg-zinc-700 hover:bg-zinc-800 disabled:opacity-60 text-zinc-900 font-semibold py-3 rounded-xl transition-all duration-150 shadow-sm cursor-pointer active:scale-[0.99] disabled:cursor-wait"
             >
               {pending ? "Connexion…" : "Se connecter"}
             </button>
