@@ -1,7 +1,7 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useState } from "react";
-import { Plus, Trash2, ChevronDown, Info, EyeOff, Users, Zap, Globe, Car as CarIcon, CalendarRange, Calculator } from "lucide-react";
+import { type ReactNode, useActionState, useEffect, useMemo, useState } from "react";
+import { Plus, Trash2, ChevronDown, ChevronLeft, ChevronRight, Info, EyeOff, Users, Zap, Globe, Car as CarIcon, CalendarRange, Calculator } from "lucide-react";
 import { saveAd } from "@/app/actions/ads";
 import { CAR_DATA, getModelsForBrand } from "@/lib/car-data";
 import {
@@ -16,6 +16,7 @@ import CarVisualPreview from "./CarVisualPreview";
 import FranceDepartmentMap from "./FranceDepartmentMap";
 
 type EligibleModel = { brand: string; model: string };
+type DateField = "start" | "end";
 
 const FRANCE_REGIONS = [
   { name: "Auvergne-Rhône-Alpes", codes: ["01", "03", "07", "15", "26", "38", "42", "43", "63", "69", "73", "74"] },
@@ -58,6 +59,157 @@ function toDateInputValue(value: string | null | undefined) {
   return value.slice(0, 10);
 }
 
+function toLocalDate(value: string) {
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function toIsoDate(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function addDays(value: string, days: number) {
+  const date = toLocalDate(value);
+  date.setDate(date.getDate() + days);
+  return toIsoDate(date);
+}
+
+function formatDateLabel(value: string) {
+  if (!value) return "Choisir une date";
+  return new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric" }).format(toLocalDate(value));
+}
+
+function formatMonthLabel(date: Date) {
+  return new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" }).format(date);
+}
+
+function getCalendarDays(monthDate: Date) {
+  const year = monthDate.getFullYear();
+  const month = monthDate.getMonth();
+  const firstDay = new Date(year, month, 1);
+  const firstWeekday = (firstDay.getDay() + 6) % 7;
+  const totalDays = new Date(year, month + 1, 0).getDate();
+
+  return [
+    ...Array.from({ length: firstWeekday }, () => null),
+    ...Array.from({ length: totalDays }, (_, index) => new Date(year, month, index + 1)),
+  ];
+}
+
+function SmoothCollapse({
+  open,
+  children,
+  className = "",
+}: {
+  open: boolean;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      aria-hidden={!open}
+      className={`grid transition-[grid-template-rows,opacity,transform] duration-300 ease-out ${
+        open ? "grid-rows-[1fr] opacity-100 translate-y-0" : "grid-rows-[0fr] opacity-0 -translate-y-1 pointer-events-none"
+      } ${className}`}
+    >
+      <div className="min-h-0 overflow-hidden">{children}</div>
+    </div>
+  );
+}
+
+function CampaignCalendar({
+  activeField,
+  monthDate,
+  startDate,
+  endDate,
+  onMonthChange,
+  onSelectDate,
+}: {
+  activeField: DateField;
+  monthDate: Date;
+  startDate: string;
+  endDate: string;
+  onMonthChange: (date: Date) => void;
+  onSelectDate: (field: DateField, value: string) => void;
+}) {
+  const minEndDate = startDate ? addDays(startDate, 7) : "";
+  const days = getCalendarDays(monthDate);
+  const weekDays = ["L", "M", "M", "J", "V", "S", "D"];
+
+  function moveMonth(direction: -1 | 1) {
+    onMonthChange(new Date(monthDate.getFullYear(), monthDate.getMonth() + direction, 1));
+  }
+
+  function isDateDisabled(value: string) {
+    return activeField === "end" && (!startDate || value < minEndDate);
+  }
+
+  function isInRange(value: string) {
+    return !!startDate && !!endDate && value > startDate && value < endDate;
+  }
+
+  return (
+    <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+      <div className="flex items-center justify-between gap-3">
+        <button type="button" onClick={() => moveMonth(-1)}
+          className="grid h-9 w-9 place-items-center rounded-lg border border-gray-200 text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-800"
+          aria-label="Mois précédent">
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+        <div className="text-sm font-semibold text-gray-900 capitalize">{formatMonthLabel(monthDate)}</div>
+        <button type="button" onClick={() => moveMonth(1)}
+          className="grid h-9 w-9 place-items-center rounded-lg border border-gray-200 text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-800"
+          aria-label="Mois suivant">
+          <ChevronRight className="h-4 w-4" />
+        </button>
+      </div>
+
+      <div className="mt-4 grid grid-cols-7 gap-1 text-center text-[11px] font-semibold uppercase text-gray-400">
+        {weekDays.map((day, index) => <div key={`${day}-${index}`}>{day}</div>)}
+      </div>
+
+      <div className="mt-2 grid grid-cols-7 gap-1">
+        {days.map((day, index) => {
+          if (!day) return <div key={`empty-${index}`} className="aspect-square" />;
+
+          const value = toIsoDate(day);
+          const disabled = isDateDisabled(value);
+          const isStart = value === startDate;
+          const isEnd = value === endDate;
+          const selected = isStart || isEnd;
+
+          return (
+            <button key={value} type="button" disabled={disabled} onClick={() => onSelectDate(activeField, value)}
+              className={`relative aspect-square rounded-lg text-sm font-medium transition-all ${
+                selected
+                  ? "bg-zinc-700 text-gray-900 shadow-sm"
+                  : isInRange(value)
+                    ? "bg-amber-50 text-gray-800"
+                    : "text-gray-700 hover:bg-gray-100"
+              } ${disabled ? "cursor-not-allowed text-gray-300 hover:bg-transparent" : ""}`}>
+              {day.getDate()}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mt-4 rounded-xl border border-gray-100 bg-gray-50 p-3 text-xs text-gray-500">
+        {activeField === "end" && startDate && (
+          <p className="mb-1 font-medium text-gray-700">Date de fin disponible à partir du {formatDateLabel(minEndDate)}.</p>
+        )}
+        {startDate && endDate ? (
+          <p><span className="font-semibold text-gray-900">{Math.round((toLocalDate(endDate).getTime() - toLocalDate(startDate).getTime()) / 86400000)} jours</span> sélectionnés, du {formatDateLabel(startDate)} au {formatDateLabel(endDate)}.</p>
+        ) : (
+          <p>Sélectionnez un début puis une fin pour voir la durée de campagne.</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function AdForm({
   ad,
   isCertified,
@@ -86,6 +238,12 @@ export default function AdForm({
   const [modelSelectionMode, setModelSelectionMode] = useState(ad?.modelSelectionMode ?? "ALL_EXCEPT");
   const [startDate, setStartDate] = useState(toDateInputValue(ad?.startDate));
   const [endDate, setEndDate] = useState(toDateInputValue(ad?.endDate));
+  const [activeDateField, setActiveDateField] = useState<DateField>("start");
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [calendarMonth, setCalendarMonth] = useState(() => {
+    const initialDate = toDateInputValue(ad?.startDate) || toDateInputValue(ad?.endDate);
+    return initialDate ? toLocalDate(initialDate) : new Date();
+  });
   const [totalBudget, setTotalBudget] = useState(ad?.totalBudget ? String(ad.totalBudget) : "");
   const [vehicleCount, setVehicleCount] = useState("");
   const [budgetSource, setBudgetSource] = useState<"budget" | "vehicles">("budget");
@@ -173,10 +331,10 @@ export default function AdForm({
 
   const campaignDays = useMemo(() => {
     if (!startDate || !endDate) return null;
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+    const start = toLocalDate(startDate);
+    const end = toLocalDate(endDate);
     const diff = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-    return diff > 0 ? diff : null;
+    return diff >= 7 ? diff : null;
   }, [startDate, endDate]);
 
   const estimatorCountry = (countries[0] as keyof typeof FUEL_PRICE_PER_LITER) ?? "France";
@@ -225,6 +383,28 @@ export default function AdForm({
   function handleVehicleCountChange(raw: string) {
     setBudgetSource("vehicles");
     setVehicleCount(raw.replace(/[^\d]/g, ""));
+  }
+
+  function openDatePicker(field: DateField) {
+    setActiveDateField(field);
+    setDatePickerOpen(true);
+    const targetDate = field === "start" ? startDate : endDate || (startDate ? addDays(startDate, 7) : "");
+    if (targetDate) setCalendarMonth(toLocalDate(targetDate));
+  }
+
+  function handleCalendarSelect(field: DateField, value: string) {
+    if (field === "start") {
+      const minEnd = addDays(value, 7);
+      setStartDate(value);
+      if (!endDate || endDate < minEnd) {
+        setEndDate(minEnd);
+      }
+      setActiveDateField("end");
+      setCalendarMonth(toLocalDate(minEnd));
+      return;
+    }
+
+    setEndDate(value);
   }
 
   const inputCls = "w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-xl px-4 py-3 focus:outline-none focus:border-zinc-700 focus:ring-2 focus:ring-zinc-700/15 transition-all placeholder:text-gray-400";
@@ -289,6 +469,9 @@ export default function AdForm({
 
       {/* Campaign dates */}
       <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 space-y-4 shadow-sm">
+        <input type="hidden" name="startDate" value={startDate} />
+        <input type="hidden" name="endDate" value={endDate} />
+
         <div>
           <h2 className="font-semibold text-gray-900 flex items-center gap-1.5"><CalendarRange className="w-4 h-4 text-gray-400" /> Dates de la campagne</h2>
           <p className="text-gray-400 text-xs mt-1">Durée minimum : 1 semaine.</p>
@@ -296,20 +479,43 @@ export default function AdForm({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Début *</label>
-            <input name="startDate" type="date" required value={startDate} onChange={(e) => setStartDate(e.target.value)} className={inputCls} />
+            <button type="button" onClick={() => openDatePicker("start")}
+              className={`w-full rounded-xl border px-4 py-3 text-left transition-all ${
+                datePickerOpen && activeDateField === "start" ? "border-zinc-700 bg-amber-50 ring-2 ring-zinc-700/15" : "border-gray-300 bg-gray-50 hover:bg-gray-100"
+              }`}>
+              <span className="block text-xs font-medium text-gray-400">Date de début</span>
+              <span className="mt-0.5 block text-sm font-semibold text-gray-900">{formatDateLabel(startDate)}</span>
+            </button>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Fin *</label>
-            <input name="endDate" type="date" required value={endDate}
-              min={startDate ? new Date(new Date(startDate).getTime() + 7 * 86400000).toISOString().slice(0, 10) : undefined}
-              onChange={(e) => setEndDate(e.target.value)} className={inputCls} />
+            <button type="button" onClick={() => openDatePicker("end")}
+              className={`w-full rounded-xl border px-4 py-3 text-left transition-all ${
+                datePickerOpen && activeDateField === "end" ? "border-zinc-700 bg-amber-50 ring-2 ring-zinc-700/15" : "border-gray-300 bg-gray-50 hover:bg-gray-100"
+              }`}>
+              <span className="block text-xs font-medium text-gray-400">Date de fin</span>
+              <span className="mt-0.5 block text-sm font-semibold text-gray-900">{formatDateLabel(endDate)}</span>
+            </button>
           </div>
         </div>
+        <SmoothCollapse open={datePickerOpen}>
+          <CampaignCalendar
+            activeField={activeDateField}
+            monthDate={calendarMonth}
+            startDate={startDate}
+            endDate={endDate}
+            onMonthChange={setCalendarMonth}
+            onSelectDate={handleCalendarSelect}
+          />
+        </SmoothCollapse>
         {startDate && endDate && campaignDays === null && (
           <p className="text-red-600 text-xs">La campagne doit durer au moins 1 semaine.</p>
         )}
         {campaignDays !== null && (
-          <p className="text-gray-400 text-xs">Durée : {campaignDays} jours.</p>
+          <div className="flex flex-wrap items-center gap-2 rounded-xl bg-amber-50 px-3 py-2 text-sm text-gray-700">
+            <span className="font-semibold text-gray-900">{campaignDays} jours</span>
+            <span className="text-xs text-gray-500">du {formatDateLabel(startDate)} au {formatDateLabel(endDate)}</span>
+          </div>
         )}
       </div>
 
@@ -364,7 +570,7 @@ export default function AdForm({
                     </div>
                   )}
 
-                  {hasDetail && isExpanded && (
+                  <SmoothCollapse open={hasDetail && isExpanded}>
                     <div className="border-t border-gray-200 bg-white p-4 space-y-4">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div>
@@ -414,7 +620,7 @@ export default function AdForm({
 
                       <FranceDepartmentMap selected={departments} onChange={setDepartments} />
                     </div>
-                  )}
+                  </SmoothCollapse>
                 </div>
               );
             })}
@@ -440,89 +646,94 @@ export default function AdForm({
           </button>
         </div>
 
-        {modelSelectionMode === "ALL_EXCEPT" ? (
-          <div>
-            <p className="text-gray-400 text-xs mb-2">Toutes les marques et tous les modèles sont acceptés.</p>
-            <button type="button" onClick={() => setShowAllVehicles((v) => !v)}
-              className="text-sm text-zinc-600 hover:text-zinc-800 font-medium underline underline-offset-2">
-              {showAllVehicles ? "Masquer" : "Voir"} la liste complète des véhicules pris en charge
-            </button>
-            {showAllVehicles && (
-              <div className="mt-3 max-h-64 overflow-y-auto space-y-3 border border-gray-100 rounded-xl p-4 bg-gray-50">
-                {CAR_DATA.map((d) => (
-                  <div key={d.brand}>
-                    <p className="text-gray-700 font-semibold text-sm mb-1">{d.brand}</p>
-                    <p className="text-gray-500 text-xs">{d.models.join(", ")}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        ) : (
-          <>
-            <p className="text-gray-400 text-xs">
-              Aucun modèle n&apos;est accepté par défaut. Ajoutez ci-dessous, un par un, les seuls modèles que vous acceptez.
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="relative">
-                <select value={addBrand} onChange={(e) => { setAddBrand(e.target.value); setAddModel(""); }} className={selectCls}>
-                  <option value="">-- Marque --</option>
-                  {CAR_DATA.map((d) => <option key={d.brand} value={d.brand}>{d.brand}</option>)}
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-              </div>
-              <div className="relative">
-                <select value={addModel} onChange={(e) => setAddModel(e.target.value)} disabled={!addBrand}
-                  className={`${selectCls} disabled:opacity-40 disabled:cursor-not-allowed`}>
-                  <option value="">-- Modèle --</option>
-                  {addModelsForBrand.map((m) => <option key={m} value={m}>{m}</option>)}
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-              </div>
-              <div className="flex gap-2">
-                <button type="button" onClick={addEligibleModel} disabled={!addBrand || !addModel}
-                  className="flex-1 flex items-center justify-center gap-1.5 bg-zinc-700 hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed text-zinc-900 text-sm font-semibold py-3 rounded-xl transition-colors shadow-sm">
-                  <Plus className="w-4 h-4" /> Ajouter
-                </button>
-                <button type="button" onClick={addAllModels}
-                  title={addBrand ? "Ajouter tous les modèles de cette marque" : "Ajouter tous les véhicules, toutes marques confondues"}
-                  className="px-3 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-xl transition-colors border border-gray-200">
-                  Tous
-                </button>
-              </div>
-            </div>
-
-            {eligibleModels.length === 0 ? (
-              <div className="text-center py-8 border border-dashed border-gray-300 rounded-xl bg-gray-50">
-                <p className="text-gray-400 text-sm">Aucun modèle sélectionné</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {(Object.entries(groupedModels) as [string, string[]][]).map(([brand, models]) => (
-                  <div key={brand} className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                    <p className="text-gray-700 font-semibold text-sm mb-2">{brand}</p>
-                    <div className="flex flex-wrap gap-2">
-                      {models.map((model) => (
-                        <span key={model} className="inline-flex items-center gap-1.5 bg-white border border-gray-200 text-gray-700 text-xs px-2.5 py-1 rounded-lg shadow-sm">
-                          {model}
-                          <button type="button"
-                            onClick={() => { const idx = eligibleModels.findIndex((m) => m.brand === brand && m.model === model); if (idx !== -1) removeModel(idx); }}
-                            className="text-gray-400 hover:text-red-500 transition-colors">
-                            <Trash2 className="w-3 h-3" />
-                          </button>
-                        </span>
-                      ))}
+        <div className="space-y-0">
+          <SmoothCollapse open={modelSelectionMode === "ALL_EXCEPT"}>
+            <div>
+              <p className="text-gray-400 text-xs mb-2">Toutes les marques et tous les modèles sont acceptés.</p>
+              <button type="button" onClick={() => setShowAllVehicles((v) => !v)}
+                disabled={modelSelectionMode !== "ALL_EXCEPT"}
+                className="text-sm text-zinc-600 hover:text-zinc-800 font-medium underline underline-offset-2">
+                {showAllVehicles ? "Masquer" : "Voir"} la liste complète des véhicules pris en charge
+              </button>
+              <SmoothCollapse open={showAllVehicles && modelSelectionMode === "ALL_EXCEPT"}>
+                <div className="mt-3 max-h-64 overflow-y-auto space-y-3 border border-gray-100 rounded-xl p-4 bg-gray-50">
+                  {CAR_DATA.map((d) => (
+                    <div key={d.brand}>
+                      <p className="text-gray-700 font-semibold text-sm mb-1">{d.brand}</p>
+                      <p className="text-gray-500 text-xs">{d.models.join(", ")}</p>
                     </div>
-                  </div>
-                ))}
-                <p className="text-gray-400 text-xs">
-                  {eligibleModels.length} modèle{eligibleModels.length !== 1 ? "s" : ""} sélectionné{eligibleModels.length !== 1 ? "s" : ""}
-                </p>
+                  ))}
+                </div>
+              </SmoothCollapse>
+            </div>
+          </SmoothCollapse>
+
+          <SmoothCollapse open={modelSelectionMode === "MANUAL"}>
+            <div className="space-y-5">
+              <p className="text-gray-400 text-xs">
+                Aucun modèle n&apos;est accepté par défaut. Ajoutez ci-dessous, un par un, les seuls modèles que vous acceptez.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="relative">
+                  <select value={addBrand} onChange={(e) => { setAddBrand(e.target.value); setAddModel(""); }} disabled={modelSelectionMode !== "MANUAL"} className={selectCls}>
+                    <option value="">-- Marque --</option>
+                    {CAR_DATA.map((d) => <option key={d.brand} value={d.brand}>{d.brand}</option>)}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                </div>
+                <div className="relative">
+                  <select value={addModel} onChange={(e) => setAddModel(e.target.value)} disabled={!addBrand || modelSelectionMode !== "MANUAL"}
+                    className={`${selectCls} disabled:opacity-40 disabled:cursor-not-allowed`}>
+                    <option value="">-- Modèle --</option>
+                    {addModelsForBrand.map((m) => <option key={m} value={m}>{m}</option>)}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                </div>
+                <div className="flex gap-2">
+                  <button type="button" onClick={addEligibleModel} disabled={!addBrand || !addModel || modelSelectionMode !== "MANUAL"}
+                    className="flex-1 flex items-center justify-center gap-1.5 bg-zinc-700 hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed text-zinc-900 text-sm font-semibold py-3 rounded-xl transition-colors shadow-sm">
+                    <Plus className="w-4 h-4" /> Ajouter
+                  </button>
+                  <button type="button" onClick={addAllModels} disabled={modelSelectionMode !== "MANUAL"}
+                    title={addBrand ? "Ajouter tous les modèles de cette marque" : "Ajouter tous les véhicules, toutes marques confondues"}
+                    className="px-3 bg-gray-100 hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed text-gray-700 text-sm rounded-xl transition-colors border border-gray-200">
+                    Tous
+                  </button>
+                </div>
               </div>
-            )}
-          </>
-        )}
+
+              {eligibleModels.length === 0 ? (
+                <div className="text-center py-8 border border-dashed border-gray-300 rounded-xl bg-gray-50">
+                  <p className="text-gray-400 text-sm">Aucun modèle sélectionné</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {(Object.entries(groupedModels) as [string, string[]][]).map(([brand, models]) => (
+                    <div key={brand} className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                      <p className="text-gray-700 font-semibold text-sm mb-2">{brand}</p>
+                      <div className="flex flex-wrap gap-2">
+                        {models.map((model) => (
+                          <span key={model} className="inline-flex items-center gap-1.5 bg-white border border-gray-200 text-gray-700 text-xs px-2.5 py-1 rounded-lg shadow-sm">
+                            {model}
+                            <button type="button"
+                              onClick={() => { const idx = eligibleModels.findIndex((m) => m.brand === brand && m.model === model); if (idx !== -1) removeModel(idx); }}
+                              className="text-gray-400 hover:text-red-500 transition-colors">
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                  <p className="text-gray-400 text-xs">
+                    {eligibleModels.length} modèle{eligibleModels.length !== 1 ? "s" : ""} sélectionné{eligibleModels.length !== 1 ? "s" : ""}
+                  </p>
+                </div>
+              )}
+            </div>
+          </SmoothCollapse>
+        </div>
       </div>
 
       {/* Budget estimator */}

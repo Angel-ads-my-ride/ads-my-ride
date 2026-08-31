@@ -176,9 +176,14 @@ export default function HomeClient({ ads, initialBrand, initialModel, isLoggedIn
           )}
         </div>
 
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce">
-          <ArrowDown className="w-5 h-5 text-gray-300" />
-        </div>
+        <button
+          type="button"
+          onClick={() => adsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+          className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce rounded-full p-3 text-gray-300 transition-colors hover:text-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-700/20"
+          aria-label="Voir les annonces"
+        >
+          <ArrowDown className="w-5 h-5" />
+        </button>
       </section>
 
       {/* ── HOW IT WORKS ── */}
