@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
 import { db } from "@/lib/db";
-import { Euro, Users, TrendingUp, BarChart3, ShieldAlert } from "lucide-react";
+import { Users, TrendingUp, BarChart3, ShieldAlert } from "lucide-react";
 import AdsSection from "./AdsSection";
 
 export default async function AdvertiserDashboardPage() {
@@ -26,7 +26,6 @@ export default async function AdvertiserDashboardPage() {
   const totalAds     = user.ads.length;
   const activeAds    = user.ads.filter((a) => a.isActive).length;
   const totalBook    = user.ads.reduce((s, a) => s + a._count.bookings, 0);
-  const totalSpent   = user.ads.reduce((s, a) => s + (a.totalBudget - a.remainingBudget), 0);
 
   return (
     <>
@@ -49,12 +48,11 @@ export default async function AdvertiserDashboardPage() {
         )}
 
         {/* Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
           {[
             { label: "Annonces totales", value: String(totalAds),             icon: BarChart3,  color: "text-blue-600",   bg: "bg-blue-50   border-blue-100" },
             { label: "Actives",          value: String(activeAds),            icon: TrendingUp, color: "text-green-600",  bg: "bg-green-50  border-green-100" },
             { label: "Candidatures",     value: String(totalBook),            icon: Users,      color: "text-purple-600", bg: "bg-purple-50 border-purple-100" },
-            { label: "Budget dépensé",   value: `${totalSpent.toFixed(2)}€`, icon: Euro,       color: "text-zinc-800", bg: "bg-zinc-50 border-zinc-100" },
           ].map((s) => (
             <div key={s.label} className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-5 shadow-sm">
               <div className={`w-9 h-9 rounded-xl border flex items-center justify-center mb-3 ${s.bg}`}>

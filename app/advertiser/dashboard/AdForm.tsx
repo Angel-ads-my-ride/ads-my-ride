@@ -152,22 +152,22 @@ function CampaignCalendar({
   }
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-      <div className="flex items-center justify-between gap-3">
+    <div className="max-w-md rounded-xl border border-gray-200 bg-white p-3 shadow-sm">
+      <div className="flex items-center justify-between gap-2">
         <button type="button" onClick={() => moveMonth(-1)}
-          className="grid h-9 w-9 place-items-center rounded-lg border border-gray-200 text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-800"
+          className="grid h-8 w-8 place-items-center rounded-lg border border-gray-200 text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-800"
           aria-label="Mois précédent">
           <ChevronLeft className="h-4 w-4" />
         </button>
-        <div className="text-sm font-semibold text-gray-900 capitalize">{formatMonthLabel(monthDate)}</div>
+        <div className="text-xs font-semibold text-gray-900 capitalize">{formatMonthLabel(monthDate)}</div>
         <button type="button" onClick={() => moveMonth(1)}
-          className="grid h-9 w-9 place-items-center rounded-lg border border-gray-200 text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-800"
+          className="grid h-8 w-8 place-items-center rounded-lg border border-gray-200 text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-800"
           aria-label="Mois suivant">
           <ChevronRight className="h-4 w-4" />
         </button>
       </div>
 
-      <div className="mt-4 grid grid-cols-7 gap-1 text-center text-[11px] font-semibold uppercase text-gray-400">
+      <div className="mt-3 grid grid-cols-7 gap-1 text-center text-[10px] font-semibold uppercase text-gray-400">
         {weekDays.map((day, index) => <div key={`${day}-${index}`}>{day}</div>)}
       </div>
 
@@ -183,7 +183,7 @@ function CampaignCalendar({
 
           return (
             <button key={value} type="button" disabled={disabled} onClick={() => onSelectDate(activeField, value)}
-              className={`relative aspect-square rounded-lg text-sm font-medium transition-all ${
+              className={`relative aspect-square rounded-md text-xs font-medium transition-all ${
                 selected
                   ? "bg-zinc-700 text-gray-900 shadow-sm"
                   : isInRange(value)
@@ -196,7 +196,7 @@ function CampaignCalendar({
         })}
       </div>
 
-      <div className="mt-4 rounded-xl border border-gray-100 bg-gray-50 p-3 text-xs text-gray-500">
+      <div className="mt-3 rounded-lg border border-gray-100 bg-gray-50 p-2.5 text-[11px] text-gray-500">
         {activeField === "end" && startDate && (
           <p className="mb-1 font-medium text-gray-700">Date de fin disponible à partir du {formatDateLabel(minEndDate)}.</p>
         )}
@@ -394,17 +394,39 @@ export default function AdForm({
 
   function handleCalendarSelect(field: DateField, value: string) {
     if (field === "start") {
-      const minEnd = addDays(value, 7);
-      setStartDate(value);
-      if (!endDate || endDate < minEnd) {
-        setEndDate(minEnd);
-      }
+      handleStartDateChange(value);
       setActiveDateField("end");
-      setCalendarMonth(toLocalDate(minEnd));
+      setCalendarMonth(toLocalDate(addDays(value, 7)));
       return;
     }
 
     setEndDate(value);
+  }
+
+  function handleStartDateChange(value: string) {
+    setStartDate(value);
+    if (!value) return;
+
+    const minEnd = addDays(value, 7);
+    if (!endDate || endDate < minEnd) {
+      setEndDate(minEnd);
+    }
+    setCalendarMonth(toLocalDate(value));
+  }
+
+  function handleEndDateChange(value: string) {
+    if (!value) {
+      setEndDate("");
+      return;
+    }
+
+    if (startDate && value < addDays(startDate, 7)) {
+      setEndDate(addDays(startDate, 7));
+      return;
+    }
+
+    setEndDate(value);
+    setCalendarMonth(toLocalDate(value));
   }
 
   const inputCls = "w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-xl px-4 py-3 focus:outline-none focus:border-zinc-700 focus:ring-2 focus:ring-zinc-700/15 transition-all placeholder:text-gray-400";
@@ -469,9 +491,6 @@ export default function AdForm({
 
       {/* Campaign dates */}
       <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-6 space-y-4 shadow-sm">
-        <input type="hidden" name="startDate" value={startDate} />
-        <input type="hidden" name="endDate" value={endDate} />
-
         <div>
           <h2 className="font-semibold text-gray-900 flex items-center gap-1.5"><CalendarRange className="w-4 h-4 text-gray-400" /> Dates de la campagne</h2>
           <p className="text-gray-400 text-xs mt-1">Durée minimum : 1 semaine.</p>
@@ -479,23 +498,46 @@ export default function AdForm({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Début *</label>
-            <button type="button" onClick={() => openDatePicker("start")}
-              className={`w-full rounded-xl border px-4 py-3 text-left transition-all ${
-                datePickerOpen && activeDateField === "start" ? "border-zinc-700 bg-amber-50 ring-2 ring-zinc-700/15" : "border-gray-300 bg-gray-50 hover:bg-gray-100"
-              }`}>
-              <span className="block text-xs font-medium text-gray-400">Date de début</span>
-              <span className="mt-0.5 block text-sm font-semibold text-gray-900">{formatDateLabel(startDate)}</span>
-            </button>
+            <div className={`flex items-center rounded-xl border bg-gray-50 transition-all ${
+              datePickerOpen && activeDateField === "start" ? "border-zinc-700 ring-2 ring-zinc-700/15" : "border-gray-300"
+            }`}>
+              <input
+                name="startDate"
+                type="date"
+                required
+                value={startDate}
+                onFocus={() => openDatePicker("start")}
+                onChange={(e) => handleStartDateChange(e.target.value)}
+                className="min-w-0 flex-1 bg-transparent px-4 py-3 text-sm font-semibold text-gray-900 focus:outline-none"
+              />
+              <button type="button" onClick={() => openDatePicker("start")}
+                className="mr-1 grid h-9 w-9 place-items-center rounded-lg text-gray-400 transition-colors hover:bg-white hover:text-zinc-700"
+                aria-label="Ouvrir le calendrier de début">
+                <CalendarRange className="h-4 w-4" />
+              </button>
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Fin *</label>
-            <button type="button" onClick={() => openDatePicker("end")}
-              className={`w-full rounded-xl border px-4 py-3 text-left transition-all ${
-                datePickerOpen && activeDateField === "end" ? "border-zinc-700 bg-amber-50 ring-2 ring-zinc-700/15" : "border-gray-300 bg-gray-50 hover:bg-gray-100"
-              }`}>
-              <span className="block text-xs font-medium text-gray-400">Date de fin</span>
-              <span className="mt-0.5 block text-sm font-semibold text-gray-900">{formatDateLabel(endDate)}</span>
-            </button>
+            <div className={`flex items-center rounded-xl border bg-gray-50 transition-all ${
+              datePickerOpen && activeDateField === "end" ? "border-zinc-700 ring-2 ring-zinc-700/15" : "border-gray-300"
+            }`}>
+              <input
+                name="endDate"
+                type="date"
+                required
+                value={endDate}
+                min={startDate ? addDays(startDate, 7) : undefined}
+                onFocus={() => openDatePicker("end")}
+                onChange={(e) => handleEndDateChange(e.target.value)}
+                className="min-w-0 flex-1 bg-transparent px-4 py-3 text-sm font-semibold text-gray-900 focus:outline-none"
+              />
+              <button type="button" onClick={() => openDatePicker("end")}
+                className="mr-1 grid h-9 w-9 place-items-center rounded-lg text-gray-400 transition-colors hover:bg-white hover:text-zinc-700"
+                aria-label="Ouvrir le calendrier de fin">
+                <CalendarRange className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         </div>
         <SmoothCollapse open={datePickerOpen}>
