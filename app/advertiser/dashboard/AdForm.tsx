@@ -18,6 +18,11 @@ import FranceDepartmentMap from "./FranceDepartmentMap";
 type EligibleModel = { brand: string; model: string };
 type DateField = "start" | "end";
 
+type FuelPriceState = {
+  prices: Partial<Record<(typeof COUNTRIES)[number], { price: number; currency: string; source: "api" | "fallback" }>>;
+  loading: boolean;
+};
+
 const FRANCE_REGIONS = [
   { name: "Auvergne-Rhône-Alpes", codes: ["01", "03", "07", "15", "26", "38", "42", "43", "63", "69", "73", "74"] },
   { name: "Bourgogne-Franche-Comté", codes: ["21", "25", "39", "58", "70", "71", "89", "90"] },
@@ -244,6 +249,7 @@ export default function AdForm({
     const initialDate = toDateInputValue(ad?.startDate) || toDateInputValue(ad?.endDate);
     return initialDate ? toLocalDate(initialDate) : new Date();
   });
+  const [fuelPrices, setFuelPrices] = useState<FuelPriceState>({ prices: {}, loading: true });
   const [totalBudget, setTotalBudget] = useState(ad?.totalBudget ? String(ad.totalBudget) : "");
   const [vehicleCount, setVehicleCount] = useState("");
   const [budgetSource, setBudgetSource] = useState<"budget" | "vehicles">("budget");
@@ -252,6 +258,50 @@ export default function AdForm({
     if (state?.success) onSaved(!!state.isDraft);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch("/api/fuel-prices")
+      .then((response) => {
+        if (!response.ok) throw new Error("Fuel price request failed");
+        return response.json() as Promise<{
+          countries?: Array<{
+            country?: string;
+            roundedAveragePrice?: number;
+            averagePrice?: number;
+            currency?: string;
+            fallback?: boolean;
+          }>;
+        }>;
+      })
+      .then((data) => {
+        if (cancelled) return;
+
+        const prices = (data.countries ?? []).reduce<FuelPriceState["prices"]>((acc, item) => {
+          if (!item.country || !COUNTRIES.includes(item.country as (typeof COUNTRIES)[number])) return acc;
+
+          const price = item.roundedAveragePrice ?? item.averagePrice;
+          if (typeof price !== "number" || !Number.isFinite(price)) return acc;
+
+          acc[item.country as (typeof COUNTRIES)[number]] = {
+            price,
+            currency: item.currency ?? "EUR",
+            source: item.fallback ? "fallback" : "api",
+          };
+          return acc;
+        }, {});
+
+        setFuelPrices({ prices, loading: false });
+      })
+      .catch(() => {
+        if (!cancelled) setFuelPrices({ prices: {}, loading: false });
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -345,13 +395,23 @@ export default function AdForm({
     const days = campaignDays;
     const costPerVehicle = ESTIMATOR_DAILY_RATE_PER_DRIVER * days + ESTIMATOR_FLAT_COST_PER_DRIVER;
 
-    const fuelPrice = FUEL_PRICE_PER_LITER[estimatorCountry] ?? FUEL_PRICE_PER_LITER.France;
+    const liveFuelPrice = fuelPrices.prices[estimatorCountry];
+    const fuelPrice = liveFuelPrice?.price ?? FUEL_PRICE_PER_LITER[estimatorCountry] ?? FUEL_PRICE_PER_LITER.France;
     const fuelCostPerKm = (AVERAGE_CONSUMPTION_L_PER_100KM / 100) * fuelPrice;
     const minKmPerDay = ESTIMATOR_DAILY_RATE_PER_DRIVER / (4 * fuelCostPerKm);
     const maxKmPerDay = ESTIMATOR_DAILY_RATE_PER_DRIVER / (2 * fuelCostPerKm);
 
-    return { days, costPerVehicle, fuelPrice, fuelCostPerKm, minKmPerDay, maxKmPerDay };
-  }, [campaignDays, estimatorCountry]);
+    return {
+      days,
+      costPerVehicle,
+      fuelPrice,
+      fuelCurrency: liveFuelPrice?.currency ?? (estimatorCountry === "Suisse" ? "CHF" : "EUR"),
+      fuelSource: liveFuelPrice?.source ?? "fallback",
+      fuelCostPerKm,
+      minKmPerDay,
+      maxKmPerDay,
+    };
+  }, [campaignDays, estimatorCountry, fuelPrices.prices]);
 
   const estimatedVehicleCount = useMemo(() => {
     if (!estimate) return "";
@@ -820,7 +880,15 @@ export default function AdForm({
               sur {estimate.days} jour{estimate.days !== 1 ? "s" : ""} (durée de votre campagne), soit {estimate.costPerVehicle.toFixed(2)}€ par véhicule.
               La campagne se met en pause automatiquement quand le budget total est atteint. Kilométrage conseillé par jour et par véhicule : environ {Math.round(estimate.minKmPerDay)}
               –{Math.round(estimate.maxKmPerDay)} km (la rémunération journalière doit couvrir entre 2 et 4 fois le coût en carburant, sur la base du prix de l&apos;essence
-              en {estimatorCountry} ≈ {estimate.fuelPrice.toFixed(2)}€/L et d&apos;une consommation moyenne de {AVERAGE_CONSUMPTION_L_PER_100KM}L/100km).
+              en {estimatorCountry} ≈ {estimate.fuelPrice.toFixed(2)} {estimate.fuelCurrency}/L{" "}
+              ({fuelPrices.loading
+                ? "mise à jour en cours"
+                : estimate.fuelSource === "api"
+                  ? estimatorCountry === "France"
+                    ? "moyenne nationale E10/SP95/SP98, API officielle"
+                    : "moyenne essence nationale disponible"
+                  : "moyenne essence de secours"})
+              {" "}et d&apos;une consommation moyenne de {AVERAGE_CONSUMPTION_L_PER_100KM}L/100km).
             </span>
           </div>
         )}

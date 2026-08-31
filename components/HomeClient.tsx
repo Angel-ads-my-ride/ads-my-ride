@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { ChevronDown, Car, ArrowDown, Shield, TrendingUp } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ChevronDown, Car, ArrowDown, Shield, TrendingUp, Activity } from "lucide-react";
 import { CAR_DATA, getModelsForBrand } from "@/lib/car-data";
+import { COUNTRIES } from "@/lib/ad-options";
 import AdCard from "./AdCard";
 import Link from "next/link";
 import { useLocale } from "@/lib/i18n/LocaleContext";
@@ -16,6 +17,15 @@ type Ad = {
   advertiser: { name: string; companyName: string | null; avatarUrl: string | null };
   eligibleModels: { brand: string; model: string }[];
   modelSelectionMode: string;
+  countries: string[];
+};
+
+type FuelTickerItem = {
+  country: string;
+  code: string;
+  roundedAveragePrice: number;
+  currency: string;
+  fallback: boolean;
 };
 
 function isModelEligible(ad: Ad, brand: string, model: string): boolean {
@@ -36,28 +46,57 @@ export default function HomeClient({ ads, initialBrand, initialModel, isLoggedIn
   const { t } = useLocale();
   const [selectedBrand, setSelectedBrand] = useState<string>(initialBrand ?? "");
   const [selectedModel, setSelectedModel] = useState<string>(initialModel ?? "");
+  const [selectedAdCountry, setSelectedAdCountry] = useState("");
+  const [fuelPrices, setFuelPrices] = useState<FuelTickerItem[]>([]);
   const adsRef = useRef<HTMLDivElement>(null);
 
   const models = selectedBrand ? getModelsForBrand(selectedBrand) : [];
 
-  useEffect(() => {
-    if (window.location.hash !== "#annonces") return;
-
-    const frame = window.requestAnimationFrame(() => {
-      adsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-
-    return () => window.cancelAnimationFrame(frame);
-  }, []);
-
-  const filteredAds =
+  const vehicleSelected = Boolean(selectedBrand && selectedModel);
+  const compatibleAds =
     selectedBrand && selectedModel
       ? ads.filter((ad) => isModelEligible(ad, selectedBrand, selectedModel))
       : ads;
+  const availableCountries = useMemo(
+    () =>
+      COUNTRIES.filter((country) =>
+        compatibleAds.some((ad) => ad.countries.length === 0 || ad.countries.includes(country))
+      ),
+    [compatibleAds]
+  );
+  const effectiveSelectedAdCountry =
+    selectedAdCountry && availableCountries.includes(selectedAdCountry as (typeof COUNTRIES)[number])
+      ? selectedAdCountry
+      : "";
+  const filteredAds = effectiveSelectedAdCountry
+    ? compatibleAds.filter((ad) => ad.countries.length === 0 || ad.countries.includes(effectiveSelectedAdCountry))
+    : compatibleAds;
+  const visibleAds = vehicleSelected ? filteredAds : ads;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch("/api/fuel-prices")
+      .then((response) => {
+        if (!response.ok) throw new Error("Fuel prices request failed");
+        return response.json() as Promise<{ countries?: FuelTickerItem[] }>;
+      })
+      .then((data) => {
+        if (!cancelled) setFuelPrices(data.countries ?? []);
+      })
+      .catch(() => {
+        if (!cancelled) setFuelPrices([]);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   function handleBrandChange(brand: string) {
     setSelectedBrand(brand);
     setSelectedModel("");
+    setSelectedAdCountry("");
   }
 
   function handleModelChange(model: string) {
@@ -186,6 +225,31 @@ export default function HomeClient({ ads, initialBrand, initialModel, isLoggedIn
         </button>
       </section>
 
+      <section className="overflow-hidden border-y border-gray-800 bg-gray-950 text-white" aria-label="Prix moyens de l'essence en Europe">
+        <div className="flex min-h-16 items-center">
+          <div className="relative z-10 flex h-16 shrink-0 items-center gap-2 border-r border-white/10 bg-gray-950 px-4 sm:px-6">
+            <Activity className="h-4 w-4 text-zinc-700" />
+            <span className="text-xs font-bold uppercase tracking-widest text-gray-200">Essence Europe</span>
+          </div>
+          <div className="fuel-ticker-mask min-w-0 flex-1">
+            <div className={`fuel-ticker-track flex w-max items-center gap-3 py-3 ${fuelPrices.length === 0 ? "fuel-ticker-paused" : ""}`}>
+              {(fuelPrices.length > 0 ? [...fuelPrices, ...fuelPrices] : []).map((fuel, index) => (
+                <div key={`${fuel.code}-${index}`} className="flex h-10 items-center gap-2 rounded border border-white/10 bg-white/[0.04] px-3 text-sm tabular-nums">
+                  <span className="text-gray-300">{fuel.country}</span>
+                  <span className="font-bold text-zinc-700">
+                    {fuel.roundedAveragePrice.toFixed(2)} {fuel.currency}/L
+                  </span>
+                  {fuel.fallback && <span className="text-[10px] uppercase tracking-wide text-gray-500">secours</span>}
+                </div>
+              ))}
+              {fuelPrices.length === 0 && (
+                <div className="px-4 text-sm text-gray-400">Chargement des prix carburant...</div>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── HOW IT WORKS ── */}
       <section id="comment-ca-marche" className="py-20 px-4 bg-gray-50 border-t border-gray-100 scroll-mt-16">
         <div className="max-w-5xl mx-auto">
@@ -223,11 +287,25 @@ export default function HomeClient({ ads, initialBrand, initialModel, isLoggedIn
               </h2>
               <p className="text-gray-500">
                 {selectedBrand && selectedModel
-                  ? `${filteredAds.length} ${filteredAds.length !== 1 ? t.ads.campaignPlural : t.ads.campaignSingular} ${filteredAds.length !== 1 ? t.ads.compatiblePlural : t.ads.compatibleSingular}`
+                  ? `${visibleAds.length} ${visibleAds.length !== 1 ? t.ads.campaignPlural : t.ads.campaignSingular} ${visibleAds.length !== 1 ? t.ads.compatiblePlural : t.ads.compatibleSingular}`
                   : t.ads.selectVehicleToFilter}
               </p>
             </div>
-            {(!selectedBrand || !selectedModel) && (
+            {selectedBrand && selectedModel ? (
+              <div className="relative self-start sm:self-end">
+                <select
+                  value={effectiveSelectedAdCountry}
+                  onChange={(e) => setSelectedAdCountry(e.target.value)}
+                  className="w-56 appearance-none rounded-xl border border-gray-300 bg-white px-4 py-2.5 pr-10 text-sm font-semibold text-gray-800 shadow-sm transition-all hover:border-orange-300 focus:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-700/15"
+                >
+                  <option value="">Tous les pays</option>
+                  {availableCountries.map((country) => (
+                    <option key={country} value={country}>{country}</option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              </div>
+            ) : (
               <button
                 onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
                 className="text-sm text-zinc-700 hover:text-zinc-800 font-semibold border border-zinc-300 hover:border-orange-300 px-4 py-2 rounded-xl transition-all self-start bg-zinc-50"
@@ -243,17 +321,18 @@ export default function HomeClient({ ads, initialBrand, initialModel, isLoggedIn
               <p className="text-gray-400 text-lg">{t.ads.noAdsAvailable}</p>
               <p className="text-gray-300 text-sm mt-2">{t.ads.comeBackSoon}</p>
             </div>
-          ) : filteredAds.length === 0 && selectedBrand && selectedModel ? (
+          ) : visibleAds.length === 0 && selectedBrand && selectedModel ? (
             <div className="text-center py-20">
               <Car className="w-16 h-16 text-gray-200 mx-auto mb-4" />
               <p className="text-gray-400 text-lg">
                 {t.ads.noCompatiblePrefix} {selectedBrand} {selectedModel}
+                {effectiveSelectedAdCountry ? ` en ${effectiveSelectedAdCountry}` : ""}
               </p>
               <p className="text-gray-300 text-sm mt-2">{t.ads.noCompatibleSoon}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {(filteredAds.length > 0 ? filteredAds : ads).map((ad) => (
+              {visibleAds.map((ad) => (
                 <AdCard key={ad.id} ad={ad} userBrand={selectedBrand} userModel={selectedModel} />
               ))}
             </div>

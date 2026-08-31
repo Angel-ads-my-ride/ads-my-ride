@@ -13,6 +13,7 @@ type Ad = {
   advertiser: { companyName: string | null; name: string; avatarUrl: string | null };
   eligibleModels: { brand: string; model: string }[];
   modelSelectionMode: string;
+  countries: string[];
 };
 
 export default function AdCard({ ad, userBrand, userModel }: { ad: Ad; userBrand?: string; userModel?: string }) {

@@ -4,6 +4,11 @@ export const COUNTRIES = [
   "Suisse",
   "Luxembourg",
   "Monaco",
+  "Allemagne",
+  "Espagne",
+  "Italie",
+  "Portugal",
+  "Pays-Bas",
   "Canada",
 ] as const;
 
@@ -13,15 +18,19 @@ export const VEHICLE_CONDITIONS = [
   { value: "BON", label: "Bon état" },
 ] as const;
 
-// Average price (€/L) of unleaded 95 fuel per country. These are static reference
-// estimates (updated manually) used only to suggest a fair km/day range in the
-// advertiser's budget estimator — not a live/real-time price feed.
+// Average price (€/L) per country. France is a fallback for the live national
+// unleaded average used by the advertiser's budget estimator.
 export const FUEL_PRICE_PER_LITER: Record<(typeof COUNTRIES)[number], number> = {
-  France: 1.85,
-  Belgique: 1.75,
-  Suisse: 1.90,
-  Luxembourg: 1.60,
-  Monaco: 1.85,
+  France: 2.09,
+  Belgique: 2.03,
+  Suisse: 1.97,
+  Luxembourg: 1.74,
+  Monaco: 2.18,
+  Allemagne: 2.27,
+  Espagne: 1.85,
+  Italie: 2.18,
+  Portugal: 2.08,
+  "Pays-Bas": 2.62,
   Canada: 1.10,
 };
 

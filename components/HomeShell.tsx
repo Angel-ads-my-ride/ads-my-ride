@@ -14,6 +14,7 @@ type Ad = {
   advertiser: { name: string; companyName: string | null; avatarUrl: string | null };
   eligibleModels: { brand: string; model: string }[];
   modelSelectionMode: string;
+  countries: string[];
 };
 
 type Props = {
