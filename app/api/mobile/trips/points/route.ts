@@ -44,7 +44,7 @@ export async function POST(request: Request) {
   });
   if (!trip) return Response.json({ error: "Trajet actif introuvable." }, { status: 404 });
 
-  const points = (body.points as IncomingPoint[])
+  let points = (body.points as IncomingPoint[])
     .slice(0, 100)
     .map((point) => ({
       latitude: optionalNumber(point.latitude),
@@ -62,6 +62,16 @@ export async function POST(request: Request) {
     )
     .sort((a, b) => a.recordedAt.getTime() - b.recordedAt.getTime());
 
+  points = [...new Map(points.map((point) => [point.recordedAt.getTime(), point])).values()];
+
+  if (!points.length) return Response.json({ accepted: 0, distanceMeters: trip.distanceMeters });
+
+  const existingPoints = await db.locationPoint.findMany({
+    where: { sessionId: trip.id, recordedAt: { in: points.map((point) => point.recordedAt) } },
+    select: { recordedAt: true },
+  });
+  const existingTimes = new Set(existingPoints.map((point) => point.recordedAt.getTime()));
+  points = points.filter((point) => !existingTimes.has(point.recordedAt.getTime()));
   if (!points.length) return Response.json({ accepted: 0, distanceMeters: trip.distanceMeters });
 
   let previous: { latitude: number; longitude: number; recordedAt: Date } | null =
@@ -85,8 +95,10 @@ export async function POST(request: Request) {
   const lastPoint = points.at(-1)!;
   // L'adaptateur Neon HTTP ne prend pas en charge les transactions Prisma.
   for (const point of points) {
-    await db.locationPoint.create({
-      data: { ...point, sessionId: trip.id },
+    await db.locationPoint.upsert({
+      where: { sessionId_recordedAt: { sessionId: trip.id, recordedAt: point.recordedAt } },
+      update: {},
+      create: { ...point, sessionId: trip.id },
     });
   }
   await db.trackingSession.update({
