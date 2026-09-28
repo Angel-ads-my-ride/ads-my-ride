@@ -16,53 +16,56 @@ model User {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  carBrand    String?
-  carModel    String?
-  phone       String?
-  address     String?
-  earnings    Float    @default(0)
-  avatarUrl   String?  @db.Text
+  carBrand                    String?
+  carModel                    String?
+  phone                       String?
+  address                     String?
+  earnings                    Float     @default(0)
+  avatarUrl                   String?   @db.Text
+  mobileOnboardingCompletedAt DateTime?
 
   companyName String?
   website     String?
   siret       String?
 
-  bookings    Booking[]
-  ads         Ad[]
+  bookings         Booking[]
+  ads              Ad[]
+  beaconDevice     BeaconDevice?
+  trackingSessions TrackingSession[]
 
   @@map("users")
 }
 
 model Ad {
-  id              String   @id @default(cuid())
+  id              String    @id @default(cuid())
   title           String
   description     String
   imageUrl        String?
-  isConfidential  Boolean  @default(false)
+  isConfidential  Boolean   @default(false)
   pricePerDay     Float
   totalBudget     Float
   remainingBudget Float
-  isActive        Boolean  @default(true)
+  isActive        Boolean   @default(true)
   maxApplicants   Int?
-  autoAccept      Boolean  @default(false)
-  status          String   @default("PENDING_REVIEW")
+  autoAccept      Boolean   @default(false)
+  status          String    @default("PENDING_REVIEW")
   adminMessage    String?
-  viewCount       Int      @default(0)
+  viewCount       Int       @default(0)
   startDate       DateTime?
   endDate         DateTime?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
-  countries           String[] @default([])
-  departments         String[] @default([])
-  vehicleConditions   String[] @default([])
-  modelSelectionMode  String   @default("ALL_EXCEPT")
+  countries          String[] @default([])
+  departments        String[] @default([])
+  vehicleConditions  String[] @default([])
+  modelSelectionMode String   @default("ALL_EXCEPT")
 
-  advertiserId    String
-  advertiser      User     @relation(fields: [advertiserId], references: [id], onDelete: Cascade)
+  advertiserId String
+  advertiser   User   @relation(fields: [advertiserId], references: [id], onDelete: Cascade)
 
-  eligibleModels  AdCarModel[]
-  bookings        Booking[]
+  eligibleModels AdCarModel[]
+  bookings       Booking[]
 
   @@map("ads")
 }
@@ -73,7 +76,7 @@ model AdCarModel {
   brand String
   model String
 
-  ad    Ad     @relation(fields: [adId], references: [id], onDelete: Cascade)
+  ad Ad @relation(fields: [adId], references: [id], onDelete: Cascade)
 
   @@unique([adId, brand, model])
   @@map("ad_car_models")
@@ -102,8 +105,73 @@ model Booking {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  ad          Ad        @relation(fields: [adId], references: [id], onDelete: Cascade)
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ad               Ad                @relation(fields: [adId], references: [id], onDelete: Cascade)
+  trackingSessions TrackingSession[]
 
   @@map("bookings")
+}
+
+model BeaconDevice {
+  id          String    @id @default(cuid())
+  serial      String    @unique
+  name        String    @default("HCBB07-KA")
+  serviceUuid String?
+  beaconUuid  String?
+  major       Int?
+  minor       Int?
+  userId      String    @unique
+  isActive    Boolean   @default(true)
+  activatedAt DateTime  @default(now())
+  lastSeenAt  DateTime?
+  lastRssi    Int?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trackingSessions TrackingSession[]
+
+  @@map("beacon_devices")
+}
+
+model TrackingSession {
+  id             String    @id @default(cuid())
+  userId         String
+  beaconDeviceId String
+  bookingId      String?
+  status         String    @default("ACTIVE")
+  startedAt      DateTime  @default(now())
+  endedAt        DateTime?
+  lastPointAt    DateTime?
+  distanceMeters Float     @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  beaconDevice BeaconDevice    @relation(fields: [beaconDeviceId], references: [id], onDelete: Cascade)
+  booking      Booking?        @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  points       LocationPoint[]
+
+  @@index([userId, status])
+  @@index([bookingId])
+  @@map("tracking_sessions")
+}
+
+model LocationPoint {
+  id         String   @id @default(cuid())
+  sessionId  String
+  latitude   Float
+  longitude  Float
+  accuracy   Float?
+  altitude   Float?
+  speed      Float?
+  heading    Float?
+  recordedAt DateTime
+  createdAt  DateTime @default(now())
+
+  session TrackingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, recordedAt])
+  @@index([sessionId, recordedAt])
+  @@map("location_points")
 }

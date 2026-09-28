@@ -1,13 +1,14 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getSession } from "@/lib/session";
-import { LayoutDashboard, FileText, Users, ClipboardList, LogOut } from "lucide-react";
+import { LayoutDashboard, FileText, Users, ClipboardList, LogOut, MapPinned } from "lucide-react";
 
 const NAV = [
   { href: "/admin",          label: "Dashboard",    icon: LayoutDashboard },
   { href: "/admin/ads",      label: "Annonces",     icon: FileText },
   { href: "/admin/users",    label: "Utilisateurs", icon: Users },
   { href: "/admin/bookings", label: "Candidatures", icon: ClipboardList },
+  { href: "/admin/tracking", label: "Suivi GPS",     icon: MapPinned },
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
