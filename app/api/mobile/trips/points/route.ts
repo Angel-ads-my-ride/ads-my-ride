@@ -1,30 +1,6 @@
 import { db } from "@/lib/db";
 import { getMobileSession, unauthorized } from "@/lib/mobile-auth";
-
-type IncomingPoint = {
-  latitude?: unknown;
-  longitude?: unknown;
-  accuracy?: unknown;
-  altitude?: unknown;
-  speed?: unknown;
-  heading?: unknown;
-  recordedAt?: unknown;
-};
-
-function haversineMeters(a: { latitude: number; longitude: number }, b: { latitude: number; longitude: number }) {
-  const radius = 6_371_000;
-  const radians = (degrees: number) => (degrees * Math.PI) / 180;
-  const dLat = radians(b.latitude - a.latitude);
-  const dLon = radians(b.longitude - a.longitude);
-  const lat1 = radians(a.latitude);
-  const lat2 = radians(b.latitude);
-  const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
-  return 2 * radius * Math.asin(Math.sqrt(h));
-}
-
-function optionalNumber(value: unknown) {
-  return typeof value === "number" && Number.isFinite(value) ? value : null;
-}
+import { calculateAddedDistance, normalizeLocationPoints, type IncomingLocationPoint } from "@/lib/tracking-distance";
 
 export async function POST(request: Request) {
   const auth = await getMobileSession(request);
@@ -44,25 +20,7 @@ export async function POST(request: Request) {
   });
   if (!trip) return Response.json({ error: "Trajet actif introuvable." }, { status: 404 });
 
-  let points = (body.points as IncomingPoint[])
-    .slice(0, 100)
-    .map((point) => ({
-      latitude: optionalNumber(point.latitude),
-      longitude: optionalNumber(point.longitude),
-      accuracy: optionalNumber(point.accuracy),
-      altitude: optionalNumber(point.altitude),
-      speed: optionalNumber(point.speed),
-      heading: optionalNumber(point.heading),
-      recordedAt: typeof point.recordedAt === "string" ? new Date(point.recordedAt) : null,
-    }))
-    .filter((point): point is typeof point & { latitude: number; longitude: number; recordedAt: Date } =>
-      point.latitude !== null && point.longitude !== null && point.recordedAt !== null &&
-      !Number.isNaN(point.recordedAt.getTime()) && Math.abs(point.latitude) <= 90 &&
-      Math.abs(point.longitude) <= 180 && (point.accuracy === null || point.accuracy <= 200)
-    )
-    .sort((a, b) => a.recordedAt.getTime() - b.recordedAt.getTime());
-
-  points = [...new Map(points.map((point) => [point.recordedAt.getTime(), point])).values()];
+  let points = normalizeLocationPoints(body.points as IncomingLocationPoint[]);
 
   if (!points.length) return Response.json({ accepted: 0, distanceMeters: trip.distanceMeters });
 
@@ -74,7 +32,7 @@ export async function POST(request: Request) {
   points = points.filter((point) => !existingTimes.has(point.recordedAt.getTime()));
   if (!points.length) return Response.json({ accepted: 0, distanceMeters: trip.distanceMeters });
 
-  let previous: { latitude: number; longitude: number; recordedAt: Date } | null =
+  const previous: { latitude: number; longitude: number; recordedAt: Date } | null =
     trip.points[0]
       ? {
           latitude: trip.points[0].latitude,
@@ -82,23 +40,16 @@ export async function POST(request: Request) {
           recordedAt: trip.points[0].recordedAt,
         }
       : null;
-  let addedDistance = 0;
-  for (const point of points) {
-    if (previous) {
-      const segment = haversineMeters(previous, point);
-      const elapsedSeconds = Math.max(1, (point.recordedAt.getTime() - previous.recordedAt.getTime()) / 1000);
-      if (segment <= 2_000 && segment / elapsedSeconds <= 80) addedDistance += segment;
-    }
-    previous = point;
-  }
+  const addedDistance = calculateAddedDistance(previous, points);
 
   const lastPoint = points.at(-1)!;
   // L'adaptateur Neon HTTP ne prend pas en charge les transactions Prisma.
   for (const point of points) {
+    const { startsNewSegment: _startsNewSegment, ...storedPoint } = point;
     await db.locationPoint.upsert({
       where: { sessionId_recordedAt: { sessionId: trip.id, recordedAt: point.recordedAt } },
       update: {},
-      create: { ...point, sessionId: trip.id },
+      create: { ...storedPoint, sessionId: trip.id },
     });
   }
   await db.trackingSession.update({
