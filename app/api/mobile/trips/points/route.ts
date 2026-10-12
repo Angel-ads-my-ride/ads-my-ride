@@ -47,14 +47,24 @@ export async function POST(request: Request) {
   const addedDistance = calculateAddedDistance(previous, points);
 
   const lastPoint = points.at(-1)!;
-  // L'adaptateur Neon HTTP ne prend pas en charge les transactions Prisma.
+  // `upsert` et `createMany` ouvrent une transaction interne avec Prisma 7,
+  // ce que l'adaptateur Neon HTTP ne prend pas en charge. Les doublons ont
+  // déjà été filtrés ci-dessus ; une collision concurrente est ignorée.
   for (const point of points) {
-    const { startsNewSegment: _startsNewSegment, ...storedPoint } = point;
-    await db.locationPoint.upsert({
-      where: { sessionId_recordedAt: { sessionId: trip.id, recordedAt: point.recordedAt } },
-      update: {},
-      create: { ...storedPoint, sessionId: trip.id },
-    });
+    const storedPoint = {
+      latitude: point.latitude,
+      longitude: point.longitude,
+      accuracy: point.accuracy,
+      altitude: point.altitude,
+      speed: point.speed,
+      heading: point.heading,
+      recordedAt: point.recordedAt,
+    };
+    try {
+      await db.locationPoint.create({ data: { ...storedPoint, sessionId: trip.id } });
+    } catch (error) {
+      if (!(error && typeof error === "object" && "code" in error && error.code === "P2002")) throw error;
+    }
   }
   await db.trackingSession.update({
     where: { id: trip.id },
