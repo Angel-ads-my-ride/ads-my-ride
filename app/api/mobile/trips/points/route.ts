@@ -1,10 +1,11 @@
 import { db } from "@/lib/db";
-import { getMobileSession, unauthorized } from "@/lib/mobile-auth";
+import { getMobileSession, getTrackingSession, unauthorized } from "@/lib/mobile-auth";
 import { calculateAddedDistance, normalizeLocationPoints, type IncomingLocationPoint } from "@/lib/tracking-distance";
 
 export async function POST(request: Request) {
-  const auth = await getMobileSession(request);
-  if (!auth) return unauthorized();
+  const accountAuth = await getMobileSession(request);
+  const trackingAuth = accountAuth ? null : await getTrackingSession(request);
+  if (!accountAuth && !trackingAuth) return unauthorized();
   const body = (await request.json().catch(() => null)) as {
     sessionId?: unknown;
     points?: unknown;
@@ -13,9 +14,12 @@ export async function POST(request: Request) {
   if (typeof body?.sessionId !== "string" || !Array.isArray(body.points)) {
     return Response.json({ error: "Lot de positions invalide." }, { status: 400 });
   }
+  if (trackingAuth && trackingAuth.sessionId !== body.sessionId) return unauthorized();
+
+  const userId = accountAuth?.userId ?? trackingAuth!.userId;
 
   const trip = await db.trackingSession.findFirst({
-    where: { id: body.sessionId, userId: auth.userId, status: "ACTIVE" },
+    where: { id: body.sessionId, userId, status: "ACTIVE" },
     include: { points: { orderBy: { recordedAt: "desc" }, take: 1 } },
   });
   if (!trip) return Response.json({ error: "Trajet actif introuvable." }, { status: 404 });

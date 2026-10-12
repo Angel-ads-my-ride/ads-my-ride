@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { getMobileSession, unauthorized } from "@/lib/mobile-auth";
+import { createTrackingToken } from "@/lib/session";
 
 export async function POST(request: Request) {
   const auth = await getMobileSession(request);
@@ -23,7 +24,10 @@ export async function POST(request: Request) {
   const alreadyActive = await db.trackingSession.findFirst({
     where: { userId: auth.userId, status: "ACTIVE" },
   });
-  if (alreadyActive) return Response.json({ trip: alreadyActive });
+  if (alreadyActive) {
+    const trackingToken = await createTrackingToken(auth.userId, alreadyActive.id);
+    return Response.json({ trip: alreadyActive, trackingToken });
+  }
 
   // L'adaptateur Neon HTTP ne prend pas en charge les transactions Prisma.
   const trip = await db.trackingSession.create({
@@ -43,5 +47,6 @@ export async function POST(request: Request) {
     });
   }
 
-  return Response.json({ trip }, { status: 201 });
+  const trackingToken = await createTrackingToken(auth.userId, trip.id);
+  return Response.json({ trip, trackingToken }, { status: 201 });
 }

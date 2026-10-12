@@ -11,6 +11,12 @@ export type SessionPayload = {
   expiresAt: Date;
 };
 
+export type TrackingTokenPayload = {
+  userId: string;
+  sessionId: string;
+  scope: "TRACKING_UPLOAD";
+};
+
 export async function encrypt(payload: SessionPayload) {
   return new SignJWT(payload)
     .setProtectedHeader({ alg: "HS256" })
@@ -26,6 +32,32 @@ export async function createMobileToken(userId: string, role: string) {
     .setIssuedAt()
     .setExpirationTime("30d")
     .sign(encodedKey);
+}
+
+export async function createTrackingToken(userId: string, sessionId: string) {
+  return new SignJWT({ userId, sessionId, scope: "TRACKING_UPLOAD" })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("30d")
+    .sign(encodedKey);
+}
+
+export async function decryptTrackingToken(token: string | undefined = ""): Promise<TrackingTokenPayload | null> {
+  try {
+    const { payload } = await jwtVerify(token, encodedKey, { algorithms: ["HS256"] });
+    if (
+      payload.scope !== "TRACKING_UPLOAD" ||
+      typeof payload.userId !== "string" ||
+      typeof payload.sessionId !== "string"
+    ) return null;
+    return {
+      userId: payload.userId,
+      sessionId: payload.sessionId,
+      scope: "TRACKING_UPLOAD",
+    };
+  } catch {
+    return null;
+  }
 }
 
 export async function decrypt(session: string | undefined = "") {
